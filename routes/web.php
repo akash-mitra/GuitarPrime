@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ThemeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -16,3 +17,5 @@ require __DIR__.'/auth.php';
 
 Route::get('auth/{provider}', [App\Http\Controllers\Auth\SocialiteLoginController::class, 'redirectToProvider'])->name('oauth.redirect');
 Route::get('auth/{provider}/callback', [App\Http\Controllers\Auth\SocialiteLoginController::class, 'handleProviderCallback'])->name('oauth.callback');
+
+Route::resource('themes', ThemeController::class)->middleware(['auth', 'role:admin,coach']);
