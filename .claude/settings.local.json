@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(composer test)"
+      "Bash(composer test)",
+      "Bash(find:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }
