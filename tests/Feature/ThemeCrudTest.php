@@ -110,3 +110,89 @@ test('theme name must be unique', function () {
 
     $response->assertSessionHasErrors(['name']);
 });
+
+test('coach can view theme show page', function () {
+    $coach = User::factory()->create(['role' => 'coach']);
+    $theme = Theme::factory()->create([
+        'name' => 'Test Theme',
+        'description' => 'Test description'
+    ]);
+
+    $response = $this->actingAs($coach)->get(route('themes.show', $theme));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Themes/Show')
+        ->has('theme')
+        ->where('theme.id', $theme->id)
+        ->where('theme.name', 'Test Theme')
+        ->where('theme.description', 'Test description')
+    );
+});
+
+test('student can view theme show page', function () {
+    $student = User::factory()->create(['role' => 'student']);
+    $theme = Theme::factory()->create();
+
+    $response = $this->actingAs($student)->get(route('themes.show', $theme));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Themes/Show')
+        ->has('theme')
+        ->where('theme.id', $theme->id)
+    );
+});
+
+test('theme show page displays approved courses only', function () {
+    $coach = User::factory()->create(['role' => 'coach']);
+    $theme = Theme::factory()->create();
+    
+    // Create approved course
+    $approvedCourse = \App\Models\Course::factory()->create([
+        'theme_id' => $theme->id,
+        'coach_id' => $coach->id,
+        'is_approved' => true,
+        'title' => 'Approved Course'
+    ]);
+    
+    // Create unapproved course
+    \App\Models\Course::factory()->create([
+        'theme_id' => $theme->id,
+        'coach_id' => $coach->id,
+        'is_approved' => false,
+        'title' => 'Unapproved Course'
+    ]);
+
+    $response = $this->actingAs($coach)->get(route('themes.show', $theme));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Themes/Show')
+        ->has('theme.courses', 1) // Only approved course
+        ->where('theme.courses.0.title', 'Approved Course')
+        ->where('theme.courses.0.id', $approvedCourse->id)
+    );
+});
+
+test('theme show page loads courses with coach information', function () {
+    $coach = User::factory()->create(['role' => 'coach', 'name' => 'John Coach']);
+    $theme = Theme::factory()->create();
+    
+    \App\Models\Course::factory()->create([
+        'theme_id' => $theme->id,
+        'coach_id' => $coach->id,
+        'is_approved' => true,
+        'title' => 'Test Course'
+    ]);
+
+    $response = $this->actingAs($coach)->get(route('themes.show', $theme));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Themes/Show')
+        ->has('theme.courses', 1)
+        ->where('theme.courses.0.coach.name', 'John Coach')
+        ->where('theme.courses.0.coach.id', $coach->id)
+    );
+});
