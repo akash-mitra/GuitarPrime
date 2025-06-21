@@ -12,6 +12,13 @@ class Course extends Model
 
     protected $fillable = ['theme_id', 'coach_id', 'title', 'description', 'is_approved'];
 
+    protected function casts(): array
+    {
+        return [
+            'is_approved' => 'boolean',
+        ];
+    }
+
     public function theme()
     {
         return $this->belongsTo(Theme::class);
@@ -27,5 +34,20 @@ class Course extends Model
         return $this->belongsToMany(Module::class, 'course_module_map')
             ->withPivot('order')
             ->orderBy('pivot_order');
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('is_approved', true);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('is_approved', false);
     }
 }
