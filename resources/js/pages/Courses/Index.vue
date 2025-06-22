@@ -152,7 +152,7 @@ const canEdit = (course: Course) => {
 }
 
 const canDelete = (course: Course) => {
-    return auth.user.role === 'admin'
+    return auth.user.role === 'admin' || (auth.user.role === 'coach' && course.coach_id === auth.user.id && !course.is_approved)
 }
 
 const deleteCourse = (course: Course) => {

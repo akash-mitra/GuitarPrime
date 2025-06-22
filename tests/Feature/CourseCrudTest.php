@@ -174,3 +174,82 @@ test('course validation works correctly', function () {
 
     $response->assertSessionHasErrors(['theme_id', 'title', 'description']);
 });
+
+test('coach can delete own unapproved course', function () {
+    $coach = User::factory()->create(['role' => 'coach']);
+    $theme = Theme::factory()->create();
+    $course = Course::factory()->create([
+        'coach_id' => $coach->id,
+        'theme_id' => $theme->id,
+        'is_approved' => false,
+        'title' => 'Unapproved Course'
+    ]);
+
+    $response = $this->actingAs($coach)->delete(route('courses.destroy', $course));
+
+    $response->assertRedirect(route('courses.index'));
+    $this->assertDatabaseMissing('courses', ['id' => $course->id]);
+});
+
+test('coach cannot delete own approved course', function () {
+    $coach = User::factory()->create(['role' => 'coach']);
+    $theme = Theme::factory()->create();
+    $course = Course::factory()->create([
+        'coach_id' => $coach->id,
+        'theme_id' => $theme->id,
+        'is_approved' => true,
+        'title' => 'Approved Course'
+    ]);
+
+    $response = $this->actingAs($coach)->delete(route('courses.destroy', $course));
+
+    $response->assertStatus(403);
+    $this->assertDatabaseHas('courses', ['id' => $course->id]);
+});
+
+test('coach cannot delete another coaches unapproved course', function () {
+    $coach1 = User::factory()->create(['role' => 'coach']);
+    $coach2 = User::factory()->create(['role' => 'coach']);
+    $theme = Theme::factory()->create();
+    $course = Course::factory()->create([
+        'coach_id' => $coach1->id,
+        'theme_id' => $theme->id,
+        'is_approved' => false,
+        'title' => 'Other Coach Course'
+    ]);
+
+    $response = $this->actingAs($coach2)->delete(route('courses.destroy', $course));
+
+    $response->assertStatus(403);
+    $this->assertDatabaseHas('courses', ['id' => $course->id]);
+});
+
+test('admin can delete any course regardless of approval status', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $coach = User::factory()->create(['role' => 'coach']);
+    $theme = Theme::factory()->create();
+    
+    // Test deleting approved course
+    $approvedCourse = Course::factory()->create([
+        'coach_id' => $coach->id,
+        'theme_id' => $theme->id,
+        'is_approved' => true,
+        'title' => 'Admin Delete Approved'
+    ]);
+
+    $response = $this->actingAs($admin)->delete(route('courses.destroy', $approvedCourse));
+    $response->assertRedirect(route('courses.index'));
+    $this->assertDatabaseMissing('courses', ['id' => $approvedCourse->id]);
+
+    // Test deleting unapproved course
+    $unapprovedCourse = Course::factory()->create([
+        'coach_id' => $coach->id,
+        'theme_id' => $theme->id,
+        'is_approved' => false,
+        'title' => 'Admin Delete Unapproved'
+    ]);
+
+    $response = $this->actingAs($admin)->delete(route('courses.destroy', $unapprovedCourse));
+    $response->assertRedirect(route('courses.index'));
+    $this->assertDatabaseMissing('courses', ['id' => $unapprovedCourse->id]);
+});

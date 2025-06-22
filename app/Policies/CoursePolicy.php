@@ -30,7 +30,7 @@ class CoursePolicy
 
     public function delete(User $user, Course $course): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasRole('admin') || ($user->hasRole('coach') && $course->coach_id === $user->id && !$course->is_approved);
     }
 
     public function approve(User $user, Course $course): bool

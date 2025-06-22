@@ -3,7 +3,8 @@
     "allow": [
       "Bash(composer test)",
       "Bash(find:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(composer test:*)"
     ],
     "deny": []
   }

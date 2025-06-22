@@ -103,7 +103,7 @@
     </AuthenticatedLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import AuthenticatedLayout from '@/layouts/AuthLayout.vue'
 import { Link, useForm } from '@inertiajs/vue3'
 
