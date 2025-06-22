@@ -9,9 +9,9 @@
                         <h1 class="text-2xl font-semibold">{{ course.title }}</h1>
                         <span
                             :class="{
-                                'bg-green-100 text-green-800': course.is_approved,
-                                'bg-yellow-100 text-yellow-800': !course.is_approved
-                              }"
+                'bg-green-100 text-green-800': course.is_approved,
+                'bg-yellow-100 text-yellow-800': !course.is_approved
+              }"
                             class="px-2 py-1 text-sm font-medium rounded"
                         >
               {{ course.is_approved ? 'Approved' : 'Pending Approval' }}
@@ -46,7 +46,14 @@
 
             <div v-if="course.modules && course.modules.length > 0" class="mt-8">
                 <h3 class="text-lg font-semibold mb-4">Course Modules</h3>
-                <div class="space-y-3">
+
+                <!-- Module Reorder Component for users who can edit -->
+                <div v-if="canEdit">
+                    <ModuleReorder :course-id="course.id" :modules="course.modules" />
+                </div>
+
+                <!-- Read-only module display for users who can't edit -->
+                <div v-else class="space-y-3">
                     <div
                         v-for="module in course.modules"
                         :key="module.id"
@@ -90,6 +97,7 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
+import ModuleReorder from '@/components/ModuleReorder.vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import type { BreadcrumbItem } from '@/types'
@@ -112,6 +120,9 @@ interface Module {
     description: string
     difficulty: 'easy' | 'medium' | 'hard'
     video_url?: string
+    pivot: {
+        order: number
+    }
 }
 
 interface Course {

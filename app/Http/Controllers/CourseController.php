@@ -64,7 +64,9 @@ class CourseController extends Controller
     {
         $this->authorize('view', $course);
 
-        $course->load(['theme', 'coach', 'modules']);
+        $course->load(['theme', 'coach', 'modules' => function ($query) {
+            $query->withPivot('order')->orderBy('course_module_map.order');
+        }]);
 
         return Inertia::render('Courses/Show', [
             'course' => $course
