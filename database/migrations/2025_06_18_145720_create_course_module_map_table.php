@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('course_module_map', function (Blueprint $table) {
-            $table->ulid('id')->primary();
+            //$table->ulid('id')->primary();
             $table->ulid('course_id')->index();
             $table->ulid('module_id')->index();
             $table->integer('order')->index();
@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade');
             $table->foreign('module_id')->references('id')->on('modules')->onDelete('cascade');
             $table->unique(['course_id', 'module_id']);
+            $table->primary(['course_id', 'module_id']); // Composite primary key
         });
     }
 

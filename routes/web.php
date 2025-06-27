@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ThemeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -32,5 +33,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('courses/approval-queue', [CourseController::class, 'approvalQueue'])->name('courses.approval-queue');
     Route::post('courses/{course}/approve', [CourseController::class, 'approve'])->name('courses.approve');
 });
-
 Route::resource('courses', CourseController::class)->middleware(['auth', 'role:admin,coach']);
+
+// Modules
+Route::middleware(['auth', 'role:admin,coach'])->group(function () {
+    Route::post('modules/reorder', [ModuleController::class, 'reorder'])
+        ->name('modules.reorder');
+});
+Route::resource('modules', ModuleController::class)
+    ->middleware(['auth', 'role:admin,coach']);

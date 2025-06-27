@@ -21,4 +21,9 @@ class Module extends Model
     {
         return $this->hasMany(Attachment::class);
     }
+
+    public function scopeByDifficulty($query, $difficulty)
+    {
+        return $query->where('difficulty', $difficulty);
+    }
 }

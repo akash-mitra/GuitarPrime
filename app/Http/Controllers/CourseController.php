@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\Module;
 use App\Models\Theme;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -35,9 +36,16 @@ class CourseController extends Controller
         $this->authorize('create', Course::class);
 
         $themes = Theme::all(['id', 'name']);
+        $modules = null;
+
+        // Only provide modules data for admins
+        if (auth()->user()->role === 'admin') {
+            $modules = Module::all(['id', 'title', 'description', 'difficulty', 'video_url']);
+        }
 
         return Inertia::render('Courses/Create', [
-            'themes' => $themes
+            'themes' => $themes,
+            'modules' => $modules
         ]);
     }
 
@@ -48,13 +56,25 @@ class CourseController extends Controller
         $validated = $request->validate([
             'theme_id' => 'required|exists:themes,id',
             'title' => 'required|string|max:255',
-            'description' => 'required|string|max:2000'
+            'description' => 'required|string|max:2000',
+            'module_ids' => 'nullable|array',
+            'module_ids.*' => 'exists:modules,id'
         ]);
 
         $validated['coach_id'] = auth()->id();
         $validated['is_approved'] = false; // Default to unapproved
 
-        Course::create($validated);
+        $course = Course::create($validated);
+
+        // Only admins can assign modules
+        if (auth()->user()->role === 'admin' && !empty($validated['module_ids'])) {
+            // Attach modules with order based on array index
+            $modulesWithOrder = [];
+            foreach ($validated['module_ids'] as $index => $moduleId) {
+                $modulesWithOrder[$moduleId] = ['order' => $index + 1];
+            }
+            $course->modules()->attach($modulesWithOrder);
+        }
 
         return redirect()->route('courses.index')
             ->with('success', 'Course created successfully. Awaiting admin approval.');
@@ -64,7 +84,9 @@ class CourseController extends Controller
     {
         $this->authorize('view', $course);
 
-        $course->load(['theme', 'coach', 'modules']);
+        $course->load(['theme', 'coach', 'modules' => function ($query) {
+            $query->withPivot('order')->orderBy('course_module_map.order');
+        }]);
 
         return Inertia::render('Courses/Show', [
             'course' => $course
@@ -76,10 +98,18 @@ class CourseController extends Controller
         $this->authorize('update', $course);
 
         $themes = Theme::all(['id', 'name']);
+        $modules = null;
+
+        // Load course modules and provide all modules data for admins
+        $course->load(['modules']);
+        if (auth()->user()->role === 'admin') {
+            $modules = Module::all(['id', 'title', 'description', 'difficulty', 'video_url']);
+        }
 
         return Inertia::render('Courses/Edit', [
             'course' => $course,
-            'themes' => $themes
+            'themes' => $themes,
+            'modules' => $modules
         ]);
     }
 
@@ -90,10 +120,24 @@ class CourseController extends Controller
         $validated = $request->validate([
             'theme_id' => 'required|exists:themes,id',
             'title' => 'required|string|max:255',
-            'description' => 'required|string|max:2000'
+            'description' => 'required|string|max:2000',
+            'module_ids' => 'nullable|array',
+            'module_ids.*' => 'exists:modules,id'
         ]);
 
         $course->update($validated);
+
+        // Only admins can manage modules
+        if (auth()->user()->role === 'admin') {
+            if (isset($validated['module_ids'])) {
+                // Sync modules with order based on array index
+                $modulesWithOrder = [];
+                foreach ($validated['module_ids'] as $index => $moduleId) {
+                    $modulesWithOrder[$moduleId] = ['order' => $index + 1];
+                }
+                $course->modules()->sync($modulesWithOrder);
+            }
+        }
 
         return redirect()->route('courses.index')
             ->with('success', 'Course updated successfully.');

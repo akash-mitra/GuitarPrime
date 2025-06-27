@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Course;
+use App\Models\Module;
 use App\Models\Theme;
 use App\Models\User;
 
@@ -252,4 +253,328 @@ test('admin can delete any course regardless of approval status', function () {
     $response = $this->actingAs($admin)->delete(route('courses.destroy', $unapprovedCourse));
     $response->assertRedirect(route('courses.index'));
     $this->assertDatabaseMissing('courses', ['id' => $unapprovedCourse->id]);
+});
+
+// Module Management Tests
+
+test('admin can create course with modules', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $theme = Theme::factory()->create();
+    $module1 = Module::factory()->create(['title' => 'Module 1']);
+    $module2 = Module::factory()->create(['title' => 'Module 2']);
+    $module3 = Module::factory()->create(['title' => 'Module 3']);
+
+    $response = $this->actingAs($admin)->post(route('courses.store'), [
+        'theme_id' => $theme->id,
+        'title' => 'Course with Modules',
+        'description' => 'A course that includes modules',
+        'module_ids' => [$module1->id, $module3->id, $module2->id] // Order matters
+    ]);
+
+    $response->assertRedirect(route('courses.index'));
+
+    $course = Course::where('title', 'Course with Modules')->first();
+    expect($course)->not->toBeNull();
+    expect($course->coach_id)->toBe($admin->id);
+
+    // Check modules are attached with correct order
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module1->id,
+        'order' => 1
+    ]);
+    
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module3->id,
+        'order' => 2
+    ]);
+    
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module2->id,
+        'order' => 3
+    ]);
+
+    // Verify the course has 3 modules
+    expect($course->modules()->count())->toBe(3);
+});
+
+test('admin can create course without modules', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $theme = Theme::factory()->create();
+
+    $response = $this->actingAs($admin)->post(route('courses.store'), [
+        'theme_id' => $theme->id,
+        'title' => 'Course without Modules',
+        'description' => 'A course with no modules',
+        'module_ids' => []
+    ]);
+
+    $response->assertRedirect(route('courses.index'));
+
+    $course = Course::where('title', 'Course without Modules')->first();
+    expect($course)->not->toBeNull();
+    expect($course->modules()->count())->toBe(0);
+});
+
+test('coach cannot create course with modules', function () {
+    $coach = User::factory()->create(['role' => 'coach']);
+    $theme = Theme::factory()->create();
+    $module = Module::factory()->create();
+
+    $response = $this->actingAs($coach)->post(route('courses.store'), [
+        'theme_id' => $theme->id,
+        'title' => 'Coach Course with Modules',
+        'description' => 'A coach trying to add modules',
+        'module_ids' => [$module->id]
+    ]);
+
+    $response->assertRedirect(route('courses.index'));
+
+    $course = Course::where('title', 'Coach Course with Modules')->first();
+    expect($course)->not->toBeNull();
+    
+    // Coach's module_ids should be ignored
+    expect($course->modules()->count())->toBe(0);
+});
+
+test('admin can update course modules', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $theme = Theme::factory()->create();
+    $module1 = Module::factory()->create(['title' => 'Module 1']);
+    $module2 = Module::factory()->create(['title' => 'Module 2']);
+    $module3 = Module::factory()->create(['title' => 'Module 3']);
+    $module4 = Module::factory()->create(['title' => 'Module 4']);
+
+    // Create course with initial modules
+    $course = Course::factory()->create([
+        'theme_id' => $theme->id,
+        'coach_id' => $admin->id,
+        'title' => 'Test Course'
+    ]);
+
+    // Attach initial modules
+    $course->modules()->attach($module1->id, ['order' => 1]);
+    $course->modules()->attach($module2->id, ['order' => 2]);
+
+    // Update course with different modules
+    $response = $this->actingAs($admin)->put(route('courses.update', $course), [
+        'theme_id' => $theme->id,
+        'title' => 'Updated Course',
+        'description' => 'Updated description',
+        'module_ids' => [$module3->id, $module4->id, $module1->id] // New order and modules
+    ]);
+
+    $response->assertRedirect(route('courses.index'));
+
+    // Check old modules are removed
+    $this->assertDatabaseMissing('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module2->id
+    ]);
+
+    // Check new modules are added with correct order
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module3->id,
+        'order' => 1
+    ]);
+    
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module4->id,
+        'order' => 2
+    ]);
+    
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module1->id,
+        'order' => 3
+    ]);
+
+    expect($course->fresh()->modules()->count())->toBe(3);
+});
+
+test('admin can remove all modules from course', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $theme = Theme::factory()->create();
+    $module1 = Module::factory()->create();
+    $module2 = Module::factory()->create();
+
+    // Create course with modules
+    $course = Course::factory()->create([
+        'theme_id' => $theme->id,
+        'coach_id' => $admin->id
+    ]);
+
+    $course->modules()->attach($module1->id, ['order' => 1]);
+    $course->modules()->attach($module2->id, ['order' => 2]);
+
+    // Remove all modules
+    $response = $this->actingAs($admin)->put(route('courses.update', $course), [
+        'theme_id' => $theme->id,
+        'title' => $course->title,
+        'description' => $course->description,
+        'module_ids' => []
+    ]);
+
+    $response->assertRedirect(route('courses.index'));
+
+    // Check all modules are removed
+    $this->assertDatabaseMissing('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module1->id
+    ]);
+    
+    $this->assertDatabaseMissing('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module2->id
+    ]);
+
+    expect($course->fresh()->modules()->count())->toBe(0);
+});
+
+test('coach cannot update course modules', function () {
+    $coach = User::factory()->create(['role' => 'coach']);
+    $theme = Theme::factory()->create();
+    $module1 = Module::factory()->create();
+    $module2 = Module::factory()->create();
+
+    // Create course with initial modules (would be done by admin)
+    $course = Course::factory()->create([
+        'theme_id' => $theme->id,
+        'coach_id' => $coach->id
+    ]);
+
+    $course->modules()->attach($module1->id, ['order' => 1]);
+
+    // Coach tries to update modules
+    $response = $this->actingAs($coach)->put(route('courses.update', $course), [
+        'theme_id' => $theme->id,
+        'title' => 'Updated by Coach',
+        'description' => 'Updated description',
+        'module_ids' => [$module2->id] // Should be ignored
+    ]);
+
+    $response->assertRedirect(route('courses.index'));
+
+    // Original module should still be there
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module1->id,
+        'order' => 1
+    ]);
+
+    // New module should not be added
+    $this->assertDatabaseMissing('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module2->id
+    ]);
+
+    expect($course->fresh()->modules()->count())->toBe(1);
+});
+
+test('module_ids validation works correctly', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $theme = Theme::factory()->create();
+
+    // Test with invalid module IDs
+    $response = $this->actingAs($admin)->post(route('courses.store'), [
+        'theme_id' => $theme->id,
+        'title' => 'Test Course',
+        'description' => 'Test description',
+        'module_ids' => ['invalid-id', 'another-invalid-id']
+    ]);
+
+    $response->assertSessionHasErrors(['module_ids.0', 'module_ids.1']);
+});
+
+test('module_ids field accepts null and empty array', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $theme = Theme::factory()->create();
+
+    // Test with null
+    $response = $this->actingAs($admin)->post(route('courses.store'), [
+        'theme_id' => $theme->id,
+        'title' => 'Course with null modules',
+        'description' => 'Test description'
+        // module_ids is not provided (null)
+    ]);
+
+    $response->assertRedirect(route('courses.index'));
+
+    $course = Course::where('title', 'Course with null modules')->first();
+    expect($course->modules()->count())->toBe(0);
+});
+
+test('admin can create course with single module', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $theme = Theme::factory()->create();
+    $module = Module::factory()->create();
+
+    $response = $this->actingAs($admin)->post(route('courses.store'), [
+        'theme_id' => $theme->id,
+        'title' => 'Single Module Course',
+        'description' => 'Course with one module',
+        'module_ids' => [$module->id]
+    ]);
+
+    $response->assertRedirect(route('courses.index'));
+
+    $course = Course::where('title', 'Single Module Course')->first();
+    expect($course->modules()->count())->toBe(1);
+    
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module->id,
+        'order' => 1
+    ]);
+});
+
+test('module order is preserved during course update', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $theme = Theme::factory()->create();
+    $module1 = Module::factory()->create(['title' => 'First']);
+    $module2 = Module::factory()->create(['title' => 'Second']);
+    $module3 = Module::factory()->create(['title' => 'Third']);
+
+    $course = Course::factory()->create([
+        'theme_id' => $theme->id,
+        'coach_id' => $admin->id
+    ]);
+
+    // Initial order: module1, module2, module3
+    $course->modules()->attach($module1->id, ['order' => 1]);
+    $course->modules()->attach($module2->id, ['order' => 2]);
+    $course->modules()->attach($module3->id, ['order' => 3]);
+
+    // Update with new order: module3, module1, module2
+    $response = $this->actingAs($admin)->put(route('courses.update', $course), [
+        'theme_id' => $theme->id,
+        'title' => $course->title,
+        'description' => $course->description,
+        'module_ids' => [$module3->id, $module1->id, $module2->id]
+    ]);
+
+    $response->assertRedirect(route('courses.index'));
+
+    // Check new order
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module3->id,
+        'order' => 1
+    ]);
+    
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module1->id,
+        'order' => 2
+    ]);
+    
+    $this->assertDatabaseHas('course_module_map', [
+        'course_id' => $course->id,
+        'module_id' => $module2->id,
+        'order' => 3
+    ]);
 });
