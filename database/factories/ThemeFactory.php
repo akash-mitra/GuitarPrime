@@ -16,4 +16,12 @@ class ThemeFactory extends Factory
             'description' => $this->faker->paragraph(),
         ];
     }
+
+    public function withData(string $name, ?string $description = null): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'name' => $name,
+            'description' => $description ?? $this->faker->paragraph(),
+        ]);
+    }
 }

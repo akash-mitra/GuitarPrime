@@ -34,7 +34,7 @@ class AssignUserRolesSeeder extends Seeder
         if (User::count() === 0) {
             User::create([
                 'name' => 'Admin User',
-                'email' => 'admin@guitarPrime.com',
+                'email' => 'admin@guitarprime.com',
                 'password' => bcrypt('password'),
                 'role' => 'admin',
                 'email_verified_at' => now(),
@@ -42,7 +42,7 @@ class AssignUserRolesSeeder extends Seeder
 
             User::create([
                 'name' => 'Coach User',
-                'email' => 'coach@guitarPrime.com',
+                'email' => 'coach@guitarprime.com',
                 'password' => bcrypt('password'),
                 'role' => 'coach',
                 'email_verified_at' => now(),
@@ -50,7 +50,7 @@ class AssignUserRolesSeeder extends Seeder
 
             User::create([
                 'name' => 'Student User',
-                'email' => 'student@guitarPrime.com',
+                'email' => 'student@guitarprime.com',
                 'password' => bcrypt('password'),
                 'role' => 'student',
                 'email_verified_at' => now(),

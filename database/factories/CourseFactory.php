@@ -35,4 +35,15 @@ class CourseFactory extends Factory
             'is_approved' => false,
         ]);
     }
+
+    public function withData(string $title, string $description, $themeId, $coachId, bool $isApproved = true): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'theme_id' => $themeId,
+            'coach_id' => $coachId,
+            'title' => $title,
+            'description' => $description,
+            'is_approved' => $isApproved,
+        ]);
+    }
 }
