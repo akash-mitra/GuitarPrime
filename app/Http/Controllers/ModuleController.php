@@ -116,8 +116,6 @@ class ModuleController extends Controller
             }
         });
 
-        return response()->json([
-            'message' => 'Modules reordered successfully.'
-        ]);
+        return back()->with('success', 'Modules reordered successfully.');
     }
 }

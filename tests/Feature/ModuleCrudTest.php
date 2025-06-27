@@ -157,7 +157,7 @@ test('coach can reorder modules in course', function () {
         ]
     ]);
 
-    $response->assertOk();
+    $response->assertRedirect();
 
     // Check new order in database
     $this->assertDatabaseHas('course_module_map', [

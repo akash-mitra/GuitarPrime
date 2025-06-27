@@ -4,7 +4,8 @@
       "Bash(composer test)",
       "Bash(find:*)",
       "Bash(npm run build:*)",
-      "Bash(composer test:*)"
+      "Bash(composer test:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }
