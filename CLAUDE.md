@@ -77,4 +77,4 @@ The application centers around a guitar education platform:
 
 ## Current State
 
-The project is actively developing course management functionality with CRUD operations, policies, and comprehensive testing coverage.
+The project has already implemented the domain model, factories, authentication, and basic CRUD operations. It is now actively developing Tailwindcss based UI (using shadcn-vue).
