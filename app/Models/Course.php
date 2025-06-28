@@ -10,7 +10,7 @@ class Course extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $fillable = ['theme_id', 'coach_id', 'title', 'description', 'is_approved'];
+    protected $fillable = ['theme_id', 'coach_id', 'title', 'description', 'is_approved', 'cover_image'];
 
     protected function casts(): array
     {

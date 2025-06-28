@@ -5,7 +5,8 @@
       "Bash(find:*)",
       "Bash(npm run build:*)",
       "Bash(composer test:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "Bash(php artisan make:migration:*)"
     ],
     "deny": []
   }

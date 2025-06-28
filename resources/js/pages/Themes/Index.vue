@@ -19,43 +19,12 @@
             </div>
 
             <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <div
+                <ThemeCard
                     v-for="theme in themes.data"
                     :key="theme.id"
-                    class="bg-gray-50 rounded-lg p-6 border border-gray-200"
-                >
-                    <h4 class="font-semibold text-lg mb-2">{{ theme.name }}</h4>
-                    <p class="text-gray-600 text-sm mb-3 line-clamp-3">
-                        {{ theme.description }}
-                    </p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs text-gray-500">
-                            {{ theme.courses_count }} courses
-                        </span>
-                        <div class="flex space-x-2">
-                            <Link
-                                :href="route('themes.show', theme.id)"
-                                class="text-blue-600 hover:text-blue-800 text-sm"
-                            >
-                                View
-                            </Link>
-                            <Link
-                                v-if="$page.props.auth.user.role !== 'student'"
-                                :href="route('themes.edit', theme.id)"
-                                class="text-green-600 hover:text-green-800 text-sm"
-                            >
-                                Edit
-                            </Link>
-                            <button
-                                v-if="$page.props.auth.user.role === 'admin'"
-                                @click="deleteTheme(theme)"
-                                class="text-red-600 hover:text-red-800 text-sm"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                    :theme="theme"
+                    @delete="deleteTheme"
+                />
             </div>
 
             <div v-if="themes.links" class="mt-6">
@@ -84,6 +53,7 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
+import ThemeCard from '@/components/ThemeCard.vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import type { BreadcrumbItem } from '@/types'
 
@@ -101,7 +71,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Themes', href: '/themes' }
 ]
 
-const deleteTheme = (theme) => {
+const deleteTheme = (theme: any) => {
     if (confirm(`Are you sure you want to delete "${theme.name}"?`)) {
         router.delete(route('themes.destroy', theme.id))
     }

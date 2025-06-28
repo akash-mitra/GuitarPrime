@@ -39,48 +39,13 @@
                     </Link>
                 </div>
 
-                <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <div
+                <div v-else class="space-y-4">
+                    <CourseCard
                         v-for="course in theme.courses"
                         :key="course.id"
-                        class="bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-                    >
-                        <h3 class="font-semibold text-lg mb-2">{{ course.title }}</h3>
-                        <p class="text-gray-600 text-sm mb-3 line-clamp-3">
-                            {{ course.description }}
-                        </p>
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="text-xs text-gray-500">
-                                by {{ course.coach.name }}
-                            </span>
-                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                Approved
-                            </span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <Link
-                                :href="route('courses.show', course.id)"
-                                class="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                            >
-                                View Course
-                            </Link>
-                            <div v-if="canManageCourse(course)" class="flex space-x-2">
-                                <Link
-                                    :href="route('courses.edit', course.id)"
-                                    class="text-green-600 hover:text-green-800 text-sm"
-                                >
-                                    Edit
-                                </Link>
-                                <button
-                                    v-if="$page.props.auth.user.role === 'admin'"
-                                    @click="deleteCourse(course)"
-                                    class="text-red-600 hover:text-red-800 text-sm"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                        :course="transformCourse(course)"
+                        @delete="deleteCourse"
+                    />
                 </div>
             </div>
 
@@ -98,6 +63,7 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
+import CourseCard from '@/components/CourseCard.vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import type { BreadcrumbItem } from '@/types'
 
@@ -110,8 +76,14 @@ const props = defineProps<{
             id: number;
             title: string;
             description: string;
+            is_approved: boolean;
+            coach_id: number;
             coach: {
                 id: number;
+                name: string;
+            };
+            theme: {
+                id: string;
                 name: string;
             };
         }>;
@@ -124,9 +96,16 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: props.theme.name, href: route('themes.show', props.theme.id) }
 ]
 
-const canManageCourse = (course) => {
-    const user = usePage().props.auth.user
-    return user.role === 'admin' || (user.role === 'coach' && user.id === course.coach.id)
+const transformCourse = (course) => {
+    return {
+        ...course,
+        is_approved: true,
+        coach_id: course.coach.id,
+        theme: {
+            id: props.theme.id.toString(),
+            name: props.theme.name
+        }
+    }
 }
 
 const deleteCourse = (course) => {
