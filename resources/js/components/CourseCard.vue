@@ -19,7 +19,12 @@
                 <div class="flex justify-between items-start">
                     <div class="flex-1">
                         <div class="flex items-center space-x-3 mb-2">
-                            <h4 class="font-semibold text-lg text-gray-900 dark:text-white">{{ course.title }}</h4>
+                            <Link
+                                :href="route('courses.show', course.id)"
+                                class="font-semibold text-lg text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                            >
+                                {{ course.title }}
+                            </Link>
                             <span
                                 :class="{
                                     'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': course.is_approved,
@@ -36,13 +41,7 @@
                             <p>Coach: {{ course.coach.name }}</p>
                         </div>
                     </div>
-                    <div class="flex space-x-2 ml-4">
-                        <Link
-                            :href="route('courses.show', course.id)"
-                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
-                        >
-                            View
-                        </Link>
+                    <div v-if="canEdit || canDelete" class="flex space-x-2 ml-4">
                         <Link
                             v-if="canEdit"
                             :href="route('courses.edit', course.id)"

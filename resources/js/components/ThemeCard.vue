@@ -16,7 +16,12 @@
                 </div>
             </div>
             <div class="flex-1 min-w-0">
-                <h4 class="font-semibold text-lg mb-2 text-gray-900 dark:text-white">{{ theme.name }}</h4>
+                <Link
+                    :href="route('themes.show', theme.id)"
+                    class="font-semibold text-lg mb-2 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors block"
+                >
+                    {{ theme.name }}
+                </Link>
                 <p class="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-3">
                     {{ theme.description }}
                 </p>
@@ -24,13 +29,7 @@
                     <span class="text-xs text-gray-500 dark:text-gray-400">
                         {{ theme.courses_count }} courses
                     </span>
-                    <div class="flex space-x-2">
-                        <Link
-                            :href="route('themes.show', theme.id)"
-                            class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 text-sm"
-                        >
-                            View
-                        </Link>
+                    <div v-if="canEdit || canDelete" class="flex space-x-2">
                         <Link
                             v-if="canEdit"
                             :href="route('themes.edit', theme.id)"
