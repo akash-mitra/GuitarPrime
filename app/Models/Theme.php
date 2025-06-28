@@ -10,7 +10,7 @@ class Theme extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $fillable = ['name', 'description'];
+    protected $fillable = ['name', 'description', 'cover_image'];
 
     public function courses()
     {

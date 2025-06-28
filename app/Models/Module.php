@@ -10,7 +10,7 @@ class Module extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $fillable = ['title', 'description', 'difficulty', 'video_url'];
+    protected $fillable = ['title', 'description', 'difficulty', 'video_url', 'cover_image'];
 
     public function courses()
     {

@@ -19,6 +19,7 @@ class CourseFactory extends Factory
             'title' => $this->faker->sentence(3),
             'description' => $this->faker->paragraphs(3, true),
             'is_approved' => $this->faker->boolean(30), // 30% chance of being approved
+            'cover_image' => $this->faker->imageUrl(800, 600, 'music', true, 'guitar course'),
         ];
     }
 
@@ -36,7 +37,7 @@ class CourseFactory extends Factory
         ]);
     }
 
-    public function withData(string $title, string $description, $themeId, $coachId, bool $isApproved = true): static
+    public function withData(string $title, string $description, $themeId, $coachId, bool $isApproved = true, ?string $coverImage = null): static
     {
         return $this->state(fn (array $attributes) => [
             'theme_id' => $themeId,
@@ -44,6 +45,7 @@ class CourseFactory extends Factory
             'title' => $title,
             'description' => $description,
             'is_approved' => $isApproved,
+            'cover_image' => $coverImage ?? $this->faker->imageUrl(800, 600, 'music', true, 'guitar course'),
         ]);
     }
 }

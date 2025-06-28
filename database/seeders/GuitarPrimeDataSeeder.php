@@ -186,7 +186,7 @@ class GuitarPrimeDataSeeder extends Seeder
 
         // Create admin user to assign as coach for these courses
         $adminCoach = User::firstOrCreate(
-            ['email' => 'admin@guitarPrime.com'],
+            ['email' => 'admin@guitarprime.com'],
             [
                 'name' => 'Guitar Prime Admin',
                 'role' => 'admin',
@@ -200,7 +200,8 @@ class GuitarPrimeDataSeeder extends Seeder
 
             $theme = Theme::create([
                 'name' => $themeData['name'],
-                'description' => "Collection of courses focused on {$themeData['name']} guitar techniques and styles."
+                'description' => "Collection of courses focused on {$themeData['name']} guitar techniques and styles.",
+                'cover_image' => $themeData['cover_image'] ?? 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=800&q=80'
             ]);
 
             foreach ($themeData['courses'] as $courseData) {
@@ -212,6 +213,7 @@ class GuitarPrimeDataSeeder extends Seeder
                     'title' => $courseData['name'],
                     'description' => $courseData['description'],
                     'is_approved' => true,
+                    'cover_image' => $courseData['cover_image'] ?? 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=800&q=80'
                 ]);
             }
         }

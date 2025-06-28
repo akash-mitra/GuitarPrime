@@ -16,6 +16,7 @@ class ModuleFactory extends Factory
             'description' => $this->faker->paragraphs(2, true),
             'difficulty' => $this->faker->randomElement(['easy', 'medium', 'hard']),
             'video_url' => $this->faker->optional(0.7)->url(),
+            'cover_image' => $this->faker->imageUrl(800, 600, 'music', true, 'guitar lesson'),
         ];
     }
 

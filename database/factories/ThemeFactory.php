@@ -14,14 +14,16 @@ class ThemeFactory extends Factory
         return [
             'name' => $this->faker->words(2, true),
             'description' => $this->faker->paragraph(),
+            'cover_image' => $this->faker->imageUrl(800, 600, 'music', true, 'guitar'),
         ];
     }
 
-    public function withData(string $name, ?string $description = null): static
+    public function withData(string $name, ?string $description = null, ?string $coverImage = null): static
     {
         return $this->state(fn (array $attributes) => [
             'name' => $name,
             'description' => $description ?? $this->faker->paragraph(),
+            'cover_image' => $coverImage ?? $this->faker->imageUrl(800, 600, 'music', true, 'guitar'),
         ]);
     }
 }
