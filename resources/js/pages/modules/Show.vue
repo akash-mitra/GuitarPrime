@@ -2,57 +2,43 @@
     <Head :title="module.title" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 max-w-7xl mx-auto">
             <div class="flex justify-between items-start">
                 <div class="flex-1">
                     <div class="flex items-center space-x-3 mb-4">
                         <h1 class="text-2xl font-semibold">{{ module.title }}</h1>
                         <span
                             :class="{
-                'bg-green-100 text-green-800': module.difficulty === 'easy',
-                'bg-yellow-100 text-yellow-800': module.difficulty === 'medium',
-                'bg-red-100 text-red-800': module.difficulty === 'hard'
-              }"
+                                'bg-green-100 text-green-800': module.difficulty === 'easy',
+                                'bg-yellow-100 text-yellow-800': module.difficulty === 'medium',
+                                'bg-red-100 text-red-800': module.difficulty === 'hard'
+                              }"
                             class="px-2 py-1 text-sm font-medium rounded"
                         >
-              {{ module.difficulty }}
-            </span>
-                        <!-- Pricing badge -->
+                            {{ module.difficulty }}
+                        </span>
+                        <!-- Free module badge -->
                         <span
-                            v-if="pricing.formatted_price"
-                            :class="{
-                'bg-green-100 text-green-800': pricing.is_free,
-                'bg-blue-100 text-blue-800': !pricing.is_free
-              }"
-                            class="px-2 py-1 text-sm font-medium rounded"
+                            v-if="module.is_free"
+                            class="bg-green-100 text-green-800 px-2 py-1 text-sm font-medium rounded"
                         >
-              {{ pricing.formatted_price }}
-            </span>
+                            Free Demo
+                        </span>
+                    </div>
+                    <!-- Video Player (admin/coach always have access) -->
+                    <div v-if="module.video_url" class="mb-4">
+                        <iframe
+                            :src="module.video_url"
+                            class="w-full h-96 rounded-lg"
+                            frameborder="0"
+                            allowfullscreen
+                        ></iframe>
                     </div>
                     <p class="text-gray-600 mb-4">{{ module.description }}</p>
-
-                    <!-- Protected Video Player -->
-                    <ProtectedVideoPlayer
-                        v-if="module.video_url"
-                        :video-url="module.video_url"
-                        :can-access="canAccess"
-                        purchasable-type="module"
-                        :purchasable-id="module.id"
-                        :pricing="pricing"
-                    />
                 </div>
 
                 <div class="flex space-x-3">
-                    <!-- Purchase Button for non-accessible paid content -->
-                    <PurchaseButton
-                        v-if="!canAccess && !pricing.is_free"
-                        purchasable-type="module"
-                        :purchasable-id="module.id"
-                        :price="pricing.price"
-                        :is-free="pricing.is_free"
-                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                    />
-                    
+
                     <Link
                         :href="route('modules.index')"
                         class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
@@ -69,15 +55,6 @@
                 </div>
             </div>
 
-            <!-- Paywall for restricted access -->
-            <PaywallCard
-                v-if="!canAccess"
-                description="Get lifetime access to this module including the video lesson and all downloadable resources."
-                purchasable-type="module"
-                :purchasable-id="module.id"
-                :pricing="pricing"
-                class="mt-6"
-            />
 
             <!-- Courses using this module -->
             <div v-if="module.courses && module.courses.length > 0" class="mt-8">
@@ -97,24 +74,41 @@
                 </div>
             </div>
 
-            <!-- Protected Attachments -->
-            <ProtectedAttachmentList
-                :attachments="module.attachments"
-                :can-access="canAccess"
-                purchasable-type="module"
-                :purchasable-id="module.id"
-                :pricing="pricing"
-            />
+            <!-- Attachments (admin/coach always have access) -->
+            <div v-if="module.attachments && module.attachments.length > 0" class="mt-8">
+                <h3 class="text-lg font-semibold mb-4">Attachments</h3>
+                <div class="space-y-2">
+                    <div
+                        v-for="attachment in module.attachments"
+                        :key="attachment.id"
+                        class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+                    >
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">{{ attachment.filename }}</p>
+                                <p class="text-xs text-gray-500">{{ (attachment.size / 1024 / 1024).toFixed(2) }} MB</p>
+                            </div>
+                        </div>
+                        <a
+                            :href="`/attachments/${attachment.id}/download`"
+                            class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-blue-600 bg-blue-100 hover:bg-blue-200"
+                        >
+                            Download
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </AppLayout>
 </template>
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import PaywallCard from '@/components/PaywallCard.vue'
-import PurchaseButton from '@/components/PurchaseButton.vue'
-import ProtectedVideoPlayer from '@/components/ProtectedVideoPlayer.vue'
-import ProtectedAttachmentList from '@/components/ProtectedAttachmentList.vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import type { BreadcrumbItem } from '@/types'
@@ -145,16 +139,10 @@ interface Module {
     courses?: Course[]
 }
 
-interface Pricing {
-    price?: number
-    is_free: boolean
-    formatted_price: string
-}
 
 const props = defineProps<{
     module: Module
     canAccess: boolean
-    pricing: Pricing
 }>()
 
 const breadcrumbs: BreadcrumbItem[] = [

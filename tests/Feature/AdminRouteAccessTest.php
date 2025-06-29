@@ -146,11 +146,16 @@ test('courses show route still works for actual course IDs', function () {
     $response->assertOk();
 });
 
-test('modules show route still works for actual module IDs', function () {
+test('modules show route requires admin/coach access', function () {
     $module = Module::factory()->create();
 
+    // Student cannot access direct module route
     $response = $this->actingAs($this->student)
         ->get("/modules/{$module->id}");
+    $response->assertStatus(403);
 
+    // Admin can access direct module route
+    $response = $this->actingAs($this->admin)
+        ->get("/modules/{$module->id}");
     $response->assertOk();
 });

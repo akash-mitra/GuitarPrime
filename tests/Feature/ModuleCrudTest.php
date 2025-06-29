@@ -18,13 +18,13 @@ test('coach can view modules index', function () {
     );
 });
 
-test('student can access modules index for browsing', function () {
+test('student cannot access modules index (admin/coach only)', function () {
     $student = User::factory()->create(['role' => 'student']);
 
     $response = $this->actingAs($student)->get(route('modules.index'));
 
-    // Students can now browse modules
-    $response->assertStatus(200);
+    // Students cannot access modules index directly
+    $response->assertStatus(403);
 });
 
 test('coach can create module', function () {

@@ -35,7 +35,7 @@ class Course extends Model
     {
         return $this->belongsToMany(Module::class, 'course_module_map')
             ->withPivot('order')
-            ->orderBy('pivot_order');
+            ->orderBy('order');
     }
 
     public function purchases()

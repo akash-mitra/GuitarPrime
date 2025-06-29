@@ -113,18 +113,43 @@ class User extends Authenticatable
             if ($purchasable instanceof \App\Models\Course) {
                 return $purchasable->coach_id === $this->id || $this->hasPurchased($purchasable);
             }
-            
+
             // For modules, check if the coach owns any course that contains this module
             if ($purchasable instanceof \App\Models\Module) {
                 $ownsModuleInCourse = $purchasable->courses()
                     ->where('coach_id', $this->id)
                     ->exists();
-                    
-                return $ownsModuleInCourse || $this->hasPurchased($purchasable);
+
+                return $ownsModuleInCourse || $this->hasAccessToModuleThroughCourse($purchasable);
             }
         }
 
-        // For students and other cases, check if user has purchased the content
-        return $this->hasPurchased($purchasable);
+        // For students and other cases
+        if ($purchasable instanceof \App\Models\Course) {
+            return $this->hasPurchased($purchasable);
+        }
+
+        // For modules, check if user has purchased any course containing this module
+        if ($purchasable instanceof \App\Models\Module) {
+            return $this->hasAccessToModuleThroughCourse($purchasable);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if user has access to a module through any purchased course
+     */
+    public function hasAccessToModuleThroughCourse(\App\Models\Module $module): bool
+    {
+        // Get all courses that contain this module
+        $courseIds = $module->courses()->pluck('courses.id');
+
+        // Check if user has purchased any of these courses
+        return $this->purchases()
+            ->where('purchasable_type', \App\Models\Course::class)
+            ->whereIn('purchasable_id', $courseIds)
+            ->where('status', 'completed')
+            ->exists();
     }
 }

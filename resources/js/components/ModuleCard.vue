@@ -42,11 +42,18 @@
           <span v-if="orderNumber" class="text-sm font-medium text-gray-500">#{{ orderNumber }}</span>
         </div>
         
-        <!-- Module title (clickable or not based on access) -->
+        <!-- Module title (always clickable when clickable prop is true) -->
         <Link
-          v-if="hasAccess && clickable"
+          v-if="clickable && courseId"
+          :href="route('courses.modules.show', [courseId, module.id])"
+          class="font-medium text-blue-600 hover:text-blue-800 hover:underline"
+        >
+          {{ module.title }}
+        </Link>
+        <Link
+          v-else-if="clickable && !courseId"
           :href="route('modules.show', module.id)"
-          class="font-medium text-blue-600 hover:text-blue-800"
+          class="font-medium text-blue-600 hover:text-blue-800 hover:underline"
         >
           {{ module.title }}
         </Link>
@@ -73,8 +80,12 @@
           </span>
           
           <!-- Module access indicator -->
-          <span v-if="!hasAccess && showAccessIndicator" class="text-xs text-gray-500">
-            Purchase required
+          <span v-if="!hasAccess && showAccessIndicator && !module.is_free" class="text-xs text-gray-500">
+            Video & downloads locked
+          </span>
+          <!-- Free module indicator -->
+          <span v-if="module.is_free" class="text-xs text-green-600">
+            Free Demo
           </span>
         </div>
       </div>
@@ -96,15 +107,6 @@
           </svg>
         </div>
         
-        <!-- Individual module purchase button for restricted modules -->
-        <PurchaseButton
-          v-if="!hasAccess && showPurchaseButton"
-          purchasable-type="module"
-          :purchasable-id="module.id"
-          :price="module.price"
-          :is-free="module.is_free || false"
-          class="text-xs py-1 px-2"
-        />
       </div>
     </div>
   </div>
@@ -112,7 +114,6 @@
 
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3'
-import PurchaseButton from '@/components/PurchaseButton.vue'
 
 interface Module {
   id: string
@@ -120,7 +121,6 @@ interface Module {
   description: string
   difficulty: 'easy' | 'medium' | 'hard'
   video_url?: string
-  price?: number | string
   is_free?: boolean
   pivot?: {
     order: number
@@ -133,9 +133,9 @@ interface Props {
   clickable?: boolean
   draggable?: boolean
   showAccessIndicator?: boolean
-  showPurchaseButton?: boolean
   showReorderHandle?: boolean
   orderNumber?: number
+  courseId?: string
 }
 
 withDefaults(defineProps<Props>(), {
@@ -143,9 +143,9 @@ withDefaults(defineProps<Props>(), {
   clickable: true,
   draggable: false,
   showAccessIndicator: true,
-  showPurchaseButton: true,
   showReorderHandle: false,
-  orderNumber: undefined
+  orderNumber: undefined,
+  courseId: undefined
 })
 
 defineEmits<{

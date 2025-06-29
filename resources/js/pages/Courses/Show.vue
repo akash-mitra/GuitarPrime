@@ -90,6 +90,8 @@
                         :key="module.id"
                         :module="module"
                         :has-access="moduleAccess[module.id]"
+                        :course-id="course.id"
+                        :clickable="true"
                     />
                 </div>
             </div>
@@ -135,7 +137,6 @@ interface Module {
     description: string
     difficulty: 'easy' | 'medium' | 'hard'
     video_url?: string
-    price?: number
     is_free?: boolean
     pivot: {
         order: number

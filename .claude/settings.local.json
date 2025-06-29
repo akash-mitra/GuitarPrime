@@ -17,7 +17,10 @@
       "Bash(./vendor/bin/pint)",
       "Bash(./vendor/bin/pest:*)",
       "Bash(npm run lint)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(grep:*)",
+      "Bash(./vendor/bin/pint:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": []
   }

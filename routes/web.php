@@ -60,6 +60,7 @@ Route::middleware(['auth', 'role:admin,coach'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
     Route::get('courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+    Route::get('courses/{course}/modules/{module}', [ModuleController::class, 'showInCourse'])->name('courses.modules.show');
 });
 
 // Module management - Admin and coach only (specific routes first)
@@ -73,8 +74,8 @@ Route::middleware(['auth', 'role:admin,coach'])->group(function () {
     Route::delete('modules/{module}', [ModuleController::class, 'destroy'])->name('modules.destroy');
 });
 
-// Module browsing - All authenticated users can view modules (parameterized routes last)
-Route::middleware('auth')->group(function () {
+// Module browsing - Admin and coach only for direct access
+Route::middleware(['auth', 'role:admin,coach'])->group(function () {
     Route::get('modules', [ModuleController::class, 'index'])->name('modules.index');
     Route::get('modules/{module}', [ModuleController::class, 'show'])->name('modules.show');
 });

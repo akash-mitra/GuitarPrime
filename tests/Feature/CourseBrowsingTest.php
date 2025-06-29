@@ -101,11 +101,11 @@ test('student cannot access course management routes', function () {
     $response->assertForbidden();
 });
 
-test('student can access modules index', function () {
+test('student cannot access modules index (admin/coach only)', function () {
     $response = $this->actingAs($this->student)
         ->get('/modules');
 
-    $response->assertOk();
+    $response->assertForbidden();
 });
 
 test('student can access themes index', function () {

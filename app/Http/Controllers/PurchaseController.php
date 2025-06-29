@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
-use App\Models\Module;
 use App\Models\Purchase;
 use App\Services\Payment\RazorpayPaymentService;
 use App\Services\Payment\StripePaymentService;
@@ -36,12 +35,12 @@ class PurchaseController extends Controller
         $this->authorize('create', Purchase::class);
 
         $validated = $request->validate([
-            'type' => ['required', Rule::in(['course', 'module'])],
+            'type' => ['required', Rule::in(['course'])],
             'id' => ['required', 'string'],
             'payment_provider' => ['required', Rule::in(['stripe', 'razorpay'])],
         ]);
 
-        $purchasableClass = $validated['type'] === 'course' ? Course::class : Module::class;
+        $purchasableClass = Course::class;
         $purchasable = $purchasableClass::findOrFail($validated['id']);
 
         if ($purchasable->isFree()) {

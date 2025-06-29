@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\Module;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -59,10 +60,30 @@ class ModuleController extends Controller
         return Inertia::render('modules/Show', [
             'module' => $module,
             'canAccess' => $user->canAccess($module),
-            'pricing' => [
-                'price' => $module->price,
-                'is_free' => $module->is_free,
-                'formatted_price' => $module->formatted_price,
+        ]);
+    }
+
+    public function showInCourse(Course $course, Module $module)
+    {
+        $this->authorize('view', $course);
+
+        // Verify that the module belongs to this course
+        if (! $course->modules()->where('modules.id', $module->id)->exists()) {
+            abort(404, 'Module not found in this course');
+        }
+
+        $module->load(['attachments']);
+        $user = auth()->user();
+
+        return Inertia::render('Courses/modules/Show', [
+            'course' => $course->load(['theme', 'coach']),
+            'module' => $module,
+            'canAccessCourse' => $user->canAccess($course),
+            'canAccessModule' => $user->canAccess($module),
+            'coursePricing' => [
+                'price' => $course->price,
+                'is_free' => $course->is_free,
+                'formatted_price' => $course->formatted_price,
             ],
         ]);
     }

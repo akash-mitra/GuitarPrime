@@ -93,7 +93,7 @@ class CourseController extends Controller
         $course->load(['theme', 'coach', 'modules' => function ($query) {
             $query->withPivot('order')->orderBy('course_module_map.order');
         }]);
-        
+
         $user = auth()->user();
 
         return Inertia::render('Courses/Show', [

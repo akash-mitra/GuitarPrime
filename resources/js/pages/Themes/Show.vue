@@ -64,7 +64,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import CourseCard from '@/components/CourseCard.vue'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Head, Link, router } from '@inertiajs/vue3'
 import type { BreadcrumbItem } from '@/types'
 
 const props = defineProps<{

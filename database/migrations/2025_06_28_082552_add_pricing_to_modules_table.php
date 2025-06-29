@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('modules', function (Blueprint $table) {
-            $table->decimal('price', 10, 2)->nullable()->after('cover_image');
-            $table->boolean('is_free')->default(false)->after('price');
+            $table->boolean('is_free')->default(false);
         });
     }
 
@@ -23,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('modules', function (Blueprint $table) {
-            $table->dropColumn(['price', 'is_free']);
+            $table->dropColumn(['is_free']);
         });
     }
 };
