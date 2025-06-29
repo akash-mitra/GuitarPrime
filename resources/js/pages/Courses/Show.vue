@@ -16,6 +16,17 @@
                         >
               {{ course.is_approved ? 'Approved' : 'Pending Approval' }}
             </span>
+                        <!-- Pricing badge -->
+                        <span
+                            v-if="pricing.formatted_price"
+                            :class="{
+                'bg-green-100 text-green-800': pricing.is_free,
+                'bg-blue-100 text-blue-800': !pricing.is_free
+              }"
+                            class="px-2 py-1 text-sm font-medium rounded"
+                        >
+              {{ pricing.formatted_price }}
+            </span>
                     </div>
                     <p class="text-gray-600 mb-4">{{ course.description }}</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
@@ -28,6 +39,16 @@
                     </div>
                 </div>
                 <div class="flex space-x-3">
+                    <!-- Purchase Button for non-accessible paid content -->
+                    <PurchaseButton
+                        v-if="!canAccess && !pricing.is_free"
+                        purchasable-type="course"
+                        :purchasable-id="course.id"
+                        :price="pricing.price"
+                        :is-free="pricing.is_free"
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                    />
+                    
                     <Link
                         :href="route('courses.index')"
                         class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
@@ -44,6 +65,16 @@
                 </div>
             </div>
 
+            <!-- Paywall for restricted course access -->
+            <PaywallCard
+                v-if="!canAccess"
+                description="Get lifetime access to this complete course including all modules, video lessons, and downloadable resources."
+                purchasable-type="course"
+                :purchasable-id="course.id"
+                :pricing="pricing"
+                class="mt-6"
+            />
+
             <div v-if="course.modules && course.modules.length > 0" class="mt-8">
                 <h3 class="text-lg font-semibold mb-4">Course Modules</h3>
 
@@ -54,31 +85,12 @@
 
                 <!-- Read-only module display for users who can't edit -->
                 <div v-else class="space-y-3">
-                    <div
+                    <ModuleCard
                         v-for="module in course.modules"
                         :key="module.id"
-                        class="bg-gray-50 rounded-lg p-4 border border-gray-200"
-                    >
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="font-medium">{{ module.title }}</h4>
-                                <p class="text-sm text-gray-600 mt-1">{{ module.description }}</p>
-                                <span
-                                    :class="{
-                    'bg-green-100 text-green-800': module.difficulty === 'easy',
-                    'bg-yellow-100 text-yellow-800': module.difficulty === 'medium',
-                    'bg-red-100 text-red-800': module.difficulty === 'hard'
-                  }"
-                                    class="inline-block px-2 py-1 text-xs font-medium rounded mt-2"
-                                >
-                  {{ module.difficulty }}
-                </span>
-                            </div>
-                            <div v-if="module.video_url" class="text-sm text-blue-600">
-                                Has Video
-                            </div>
-                        </div>
-                    </div>
+                        :module="module"
+                        :has-access="moduleAccess[module.id]"
+                    />
                 </div>
             </div>
 
@@ -98,6 +110,9 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import ModuleReorder from '@/components/ModuleReorder.vue'
+import ModuleCard from '@/components/ModuleCard.vue'
+import PaywallCard from '@/components/PaywallCard.vue'
+import PurchaseButton from '@/components/PurchaseButton.vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import type { BreadcrumbItem } from '@/types'
@@ -120,6 +135,8 @@ interface Module {
     description: string
     difficulty: 'easy' | 'medium' | 'hard'
     video_url?: string
+    price?: number
+    is_free?: boolean
     pivot: {
         order: number
     }
@@ -136,8 +153,17 @@ interface Course {
     modules?: Module[]
 }
 
+interface Pricing {
+    price?: number
+    is_free: boolean
+    formatted_price: string
+}
+
 const props = defineProps<{
     course: Course
+    canAccess: boolean
+    pricing: Pricing
+    moduleAccess: Record<string, boolean>
 }>()
 
 const breadcrumbs: BreadcrumbItem[] = [

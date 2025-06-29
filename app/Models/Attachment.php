@@ -17,7 +17,7 @@ class Attachment extends Model
         'path',
         'type',
         'size',
-        'mime_type'
+        'mime_type',
     ];
 
     public function module()

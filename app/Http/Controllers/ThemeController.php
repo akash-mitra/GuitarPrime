@@ -18,7 +18,7 @@ class ThemeController extends Controller
         $themes = Theme::withCount('courses')->latest()->paginate(10);
 
         return Inertia::render('Themes/Index', [
-            'themes' => $themes
+            'themes' => $themes,
         ]);
     }
 
@@ -35,7 +35,7 @@ class ThemeController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:themes,name',
-            'description' => 'nullable|string|max:1000'
+            'description' => 'nullable|string|max:1000',
         ]);
 
         Theme::create($validated);
@@ -53,7 +53,7 @@ class ThemeController extends Controller
         }]);
 
         return Inertia::render('Themes/Show', [
-            'theme' => $theme
+            'theme' => $theme,
         ]);
     }
 
@@ -62,7 +62,7 @@ class ThemeController extends Controller
         $this->authorize('update', $theme);
 
         return Inertia::render('Themes/Edit', [
-            'theme' => $theme
+            'theme' => $theme,
         ]);
     }
 
@@ -71,8 +71,8 @@ class ThemeController extends Controller
         $this->authorize('update', $theme);
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:themes,name,' . $theme->id,
-            'description' => 'nullable|string|max:1000'
+            'name' => 'required|string|max:255|unique:themes,name,'.$theme->id,
+            'description' => 'nullable|string|max:1000',
         ]);
 
         $theme->update($validated);

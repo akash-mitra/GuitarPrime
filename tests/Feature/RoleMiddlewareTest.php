@@ -7,10 +7,10 @@ test('role middleware allows access for authorized roles', function () {
     $admin = User::factory()->create(['role' => 'admin']);
 
     $request = request();
-    $request->setUserResolver(fn() => $admin);
+    $request->setUserResolver(fn () => $admin);
 
-    $middleware = new RoleMiddleware();
-    $response = $middleware->handle($request, fn() => response('success'), 'admin');
+    $middleware = new RoleMiddleware;
+    $response = $middleware->handle($request, fn () => response('success'), 'admin');
 
     expect($response->getContent())->toBe('success');
 });
@@ -19,11 +19,11 @@ test('role middleware blocks access for unauthorized roles', function () {
     $student = User::factory()->create(['role' => 'student']);
 
     $request = request();
-    $request->setUserResolver(fn() => $student);
+    $request->setUserResolver(fn () => $student);
 
-    $middleware = new RoleMiddleware();
+    $middleware = new RoleMiddleware;
 
-    expect(fn() => $middleware->handle($request, fn() => response('success'), 'admin'))
+    expect(fn () => $middleware->handle($request, fn () => response('success'), 'admin'))
         ->toThrow(\Symfony\Component\HttpKernel\Exception\HttpException::class);
 });
 
@@ -31,20 +31,20 @@ test('role middleware allows access for multiple roles', function () {
     $coach = User::factory()->create(['role' => 'coach']);
 
     $request = request();
-    $request->setUserResolver(fn() => $coach);
+    $request->setUserResolver(fn () => $coach);
 
-    $middleware = new RoleMiddleware();
-    $response = $middleware->handle($request, fn() => response('success'), 'admin', 'coach');
+    $middleware = new RoleMiddleware;
+    $response = $middleware->handle($request, fn () => response('success'), 'admin', 'coach');
 
     expect($response->getContent())->toBe('success');
 });
 
 test('role middleware redirects unauthenticated users', function () {
     $request = request();
-    $request->setUserResolver(fn() => null);
+    $request->setUserResolver(fn () => null);
 
-    $middleware = new RoleMiddleware();
-    $response = $middleware->handle($request, fn() => response('success'), 'admin');
+    $middleware = new RoleMiddleware;
+    $response = $middleware->handle($request, fn () => response('success'), 'admin');
 
     expect($response->getStatusCode())->toBe(302);
 });

@@ -11,41 +11,21 @@
                 ref="sortableContainer"
                 class="space-y-3"
             >
-                <div
+                <ModuleCard
                     v-for="(module, index) in sortedModules"
                     :key="module.id"
                     :data-id="module.id"
-                    class="bg-gray-50 rounded-lg p-4 border border-gray-200 cursor-move hover:bg-gray-100 transition-colors"
-                    draggable="true"
+                    :module="module"
+                    :has-access="true"
+                    :clickable="false"
+                    :draggable="true"
+                    :show-access-indicator="false"
+                    :show-purchase-button="false"
+                    :show-reorder-handle="true"
+                    :order-number="index + 1"
                     @dragstart="onDragStart($event, index)"
-                    @dragover.prevent
                     @drop="onDrop($event, index)"
-                >
-                    <div class="flex items-center space-x-3">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M7 2a1 1 0 000 2h6a1 1 0 100-2H7zM4 5a2 2 0 012-2h8a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 2a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h.01a1 1 0 100-2H10zm3 0a1 1 0 000 2h.01a1 1 0 100-2H13zm-6 3a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h.01a1 1 0 100-2H10zm3 0a1 1 0 000 2h.01a1 1 0 100-2H13z"/>
-                            </svg>
-                        </div>
-                        <div class="flex-1">
-                            <div class="flex items-center space-x-2">
-                                <span class="text-sm font-medium text-gray-500">#{{ index + 1 }}</span>
-                                <h4 class="font-medium">{{ module.title }}</h4>
-                                <span
-                                    :class="{
-                    'bg-green-100 text-green-800': module.difficulty === 'easy',
-                    'bg-yellow-100 text-yellow-800': module.difficulty === 'medium',
-                    'bg-red-100 text-red-800': module.difficulty === 'hard'
-                  }"
-                                    class="px-2 py-1 text-xs font-medium rounded"
-                                >
-                  {{ module.difficulty }}
-                </span>
-                            </div>
-                            <p class="text-sm text-gray-600 mt-1">{{ module.description }}</p>
-                        </div>
-                    </div>
-                </div>
+                />
             </div>
 
             <div class="mt-6 flex justify-between items-center">
@@ -74,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import ModuleCard from '@/components/ModuleCard.vue'
 import { router } from '@inertiajs/vue3'
 import { computed, ref, reactive } from 'vue'
 

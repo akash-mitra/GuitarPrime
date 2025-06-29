@@ -17,24 +17,42 @@
                         >
               {{ module.difficulty }}
             </span>
+                        <!-- Pricing badge -->
+                        <span
+                            v-if="pricing.formatted_price"
+                            :class="{
+                'bg-green-100 text-green-800': pricing.is_free,
+                'bg-blue-100 text-blue-800': !pricing.is_free
+              }"
+                            class="px-2 py-1 text-sm font-medium rounded"
+                        >
+              {{ pricing.formatted_price }}
+            </span>
                     </div>
                     <p class="text-gray-600 mb-4">{{ module.description }}</p>
 
-                    <div v-if="module.video_url" class="mb-4">
-                        <h3 class="text-lg font-medium mb-2">Video</h3>
-                        <div class="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                            <a
-                                :href="module.video_url"
-                                target="_blank"
-                                class="text-blue-600 hover:text-blue-800"
-                            >
-                                Watch on Vimeo →
-                            </a>
-                        </div>
-                    </div>
+                    <!-- Protected Video Player -->
+                    <ProtectedVideoPlayer
+                        v-if="module.video_url"
+                        :video-url="module.video_url"
+                        :can-access="canAccess"
+                        purchasable-type="module"
+                        :purchasable-id="module.id"
+                        :pricing="pricing"
+                    />
                 </div>
 
                 <div class="flex space-x-3">
+                    <!-- Purchase Button for non-accessible paid content -->
+                    <PurchaseButton
+                        v-if="!canAccess && !pricing.is_free"
+                        purchasable-type="module"
+                        :purchasable-id="module.id"
+                        :price="pricing.price"
+                        :is-free="pricing.is_free"
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                    />
+                    
                     <Link
                         :href="route('modules.index')"
                         class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
@@ -50,6 +68,16 @@
                     </Link>
                 </div>
             </div>
+
+            <!-- Paywall for restricted access -->
+            <PaywallCard
+                v-if="!canAccess"
+                description="Get lifetime access to this module including the video lesson and all downloadable resources."
+                purchasable-type="module"
+                :purchasable-id="module.id"
+                :pricing="pricing"
+                class="mt-6"
+            />
 
             <!-- Courses using this module -->
             <div v-if="module.courses && module.courses.length > 0" class="mt-8">
@@ -69,43 +97,24 @@
                 </div>
             </div>
 
-            <!-- Attachments -->
-            <div v-if="module.attachments && module.attachments.length > 0" class="mt-8">
-                <h3 class="text-lg font-semibold mb-4">Attachments</h3>
-                <div class="space-y-2">
-                    <div
-                        v-for="attachment in module.attachments"
-                        :key="attachment.id"
-                        class="bg-gray-50 rounded-lg p-3 border border-gray-200 flex justify-between items-center"
-                    >
-                        <div>
-                            <h4 class="font-medium text-sm">{{ attachment.filename }}</h4>
-                            <p class="text-xs text-gray-500">
-                                {{ formatFileSize(attachment.size) }} • {{ attachment.mime_type }}
-                            </p>
-                        </div>
-                        <button class="text-blue-600 hover:text-blue-800 text-sm">
-                            Download
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div v-else class="mt-8 text-center py-8">
-                <div class="text-gray-400 mb-4">
-                    <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                    </svg>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No attachments</h3>
-                <p class="text-gray-500">This module doesn't have any attachments yet.</p>
-            </div>
+            <!-- Protected Attachments -->
+            <ProtectedAttachmentList
+                :attachments="module.attachments"
+                :can-access="canAccess"
+                purchasable-type="module"
+                :purchasable-id="module.id"
+                :pricing="pricing"
+            />
         </div>
     </AppLayout>
 </template>
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
+import PaywallCard from '@/components/PaywallCard.vue'
+import PurchaseButton from '@/components/PurchaseButton.vue'
+import ProtectedVideoPlayer from '@/components/ProtectedVideoPlayer.vue'
+import ProtectedAttachmentList from '@/components/ProtectedAttachmentList.vue'
 import { Head, Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import type { BreadcrumbItem } from '@/types'
@@ -136,8 +145,16 @@ interface Module {
     courses?: Course[]
 }
 
+interface Pricing {
+    price?: number
+    is_free: boolean
+    formatted_price: string
+}
+
 const props = defineProps<{
     module: Module
+    canAccess: boolean
+    pricing: Pricing
 }>()
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -151,12 +168,4 @@ const { auth } = usePage().props
 const canEdit = computed(() => {
     return auth.user.role === 'admin' || auth.user.role === 'coach'
 })
-
-const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-}
 </script>

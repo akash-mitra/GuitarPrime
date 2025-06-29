@@ -21,7 +21,7 @@ class ModuleController extends Controller
             ->paginate(10);
 
         return Inertia::render('modules/Index', [
-            'modules' => $modules
+            'modules' => $modules,
         ]);
     }
 
@@ -40,7 +40,7 @@ class ModuleController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:2000',
             'difficulty' => 'required|in:easy,medium,hard',
-            'video_url' => 'nullable|url|regex:/^https:\/\/(www\.)?vimeo\.com\/\d+(\?.*)?$/'
+            'video_url' => 'nullable|url|regex:/^https:\/\/(www\.)?vimeo\.com\/\d+(\?.*)?$/',
         ]);
 
         Module::create($validated);
@@ -54,9 +54,16 @@ class ModuleController extends Controller
         $this->authorize('view', $module);
 
         $module->load(['attachments', 'courses']);
+        $user = auth()->user();
 
         return Inertia::render('modules/Show', [
-            'module' => $module
+            'module' => $module,
+            'canAccess' => $user->canAccess($module),
+            'pricing' => [
+                'price' => $module->price,
+                'is_free' => $module->is_free,
+                'formatted_price' => $module->formatted_price,
+            ],
         ]);
     }
 
@@ -65,7 +72,7 @@ class ModuleController extends Controller
         $this->authorize('update', $module);
 
         return Inertia::render('modules/Edit', [
-            'module' => $module
+            'module' => $module,
         ]);
     }
 
@@ -77,7 +84,7 @@ class ModuleController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:2000',
             'difficulty' => 'required|in:easy,medium,hard',
-            'video_url' => 'nullable|url|regex:/^https:\/\/(www\.)?vimeo\.com\/\d+(\?.*)?$/'
+            'video_url' => 'nullable|url|regex:/^https:\/\/(www\.)?vimeo\.com\/\d+(\?.*)?$/',
         ]);
 
         $module->update($validated);
@@ -98,13 +105,13 @@ class ModuleController extends Controller
 
     public function reorder(Request $request)
     {
-        $this->authorize('update', new Module());
+        $this->authorize('update', new Module);
 
         $validated = $request->validate([
             'course_id' => 'required|exists:courses,id',
             'modules' => 'required|array',
             'modules.*.id' => 'required|exists:modules,id',
-            'modules.*.order' => 'required|integer|min:1'
+            'modules.*.order' => 'required|integer|min:1',
         ]);
 
         DB::transaction(function () use ($validated) {

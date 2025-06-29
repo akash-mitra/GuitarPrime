@@ -10,12 +10,14 @@ class Course extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $fillable = ['theme_id', 'coach_id', 'title', 'description', 'is_approved', 'cover_image'];
+    protected $fillable = ['theme_id', 'coach_id', 'title', 'description', 'is_approved', 'cover_image', 'price', 'is_free'];
 
     protected function casts(): array
     {
         return [
             'is_approved' => 'boolean',
+            'is_free' => 'boolean',
+            'price' => 'decimal:2',
         ];
     }
 
@@ -38,7 +40,7 @@ class Course extends Model
 
     public function purchases()
     {
-        return $this->hasMany(Purchase::class);
+        return $this->morphMany(Purchase::class, 'purchasable');
     }
 
     public function scopeApproved($query)
@@ -49,5 +51,29 @@ class Course extends Model
     public function scopePending($query)
     {
         return $query->where('is_approved', false);
+    }
+
+    public function scopeFree($query)
+    {
+        return $query->where('is_free', true)->orWhereNull('price');
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('is_free', false)->whereNotNull('price')->where('price', '>', 0);
+    }
+
+    public function isFree(): bool
+    {
+        return $this->is_free || is_null($this->price) || $this->price <= 0;
+    }
+
+    public function getFormattedPriceAttribute(): string
+    {
+        if ($this->isFree()) {
+            return 'Free';
+        }
+
+        return '$'.number_format($this->price, 2);
     }
 }

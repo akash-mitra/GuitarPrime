@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('course_module_map', function (Blueprint $table) {
-            //$table->ulid('id')->primary();
+            // $table->ulid('id')->primary();
             $table->ulid('course_id')->index();
             $table->ulid('module_id')->index();
             $table->integer('order')->index();

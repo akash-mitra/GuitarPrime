@@ -23,6 +23,7 @@ class CoachesCoursesSeeder extends Seeder
 
         if ($themes->isEmpty()) {
             $this->command->error('No themes found. Please run GuitarPrimeDataSeeder first.');
+
             return;
         }
 
@@ -55,10 +56,10 @@ class CoachesCoursesSeeder extends Seeder
                     $difficulty = $difficulties[($moduleIndex - 1) % 3]; // Cycle through difficulties
 
                     $module = Module::factory()->create([
-                        'title' => "Module {$moduleIndex}: " . fake()->words(3, true),
+                        'title' => "Module {$moduleIndex}: ".fake()->words(3, true),
                         'description' => fake()->paragraphs(2, true),
                         'difficulty' => $difficulty,
-                        'video_url' => $moduleIndex <= 2 ? 'https://vimeo.com/' . fake()->numberBetween(100000000, 999999999) : null,
+                        'video_url' => $moduleIndex <= 2 ? 'https://vimeo.com/'.fake()->numberBetween(100000000, 999999999) : null,
                     ]);
 
                     // Attach module to course with order
