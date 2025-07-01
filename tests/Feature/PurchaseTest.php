@@ -12,7 +12,7 @@ beforeEach(function () {
 
 test('student can create a purchase for a paid course', function () {
     $course = Course::factory()->create([
-        'price' => 99.99,
+        'price' => 9999, // 99.99 rupees as paisa
         'is_free' => false,
         'is_approved' => true,
     ]);
@@ -30,7 +30,7 @@ test('student can create a purchase for a paid course', function () {
         'user_id' => $this->student->id,
         'purchasable_type' => Course::class,
         'purchasable_id' => $course->id,
-        'amount' => 99.99,
+        'amount' => 99.99, // Amount stored in rupees in purchases table
         'payment_provider' => 'stripe',
         'status' => 'failed', // Status is failed in test environment
     ]);
@@ -61,7 +61,7 @@ test('student cannot purchase free course', function () {
 
 test('student cannot purchase course twice', function () {
     $course = Course::factory()->create([
-        'price' => 99.99,
+        'price' => 9999, // 99.99 rupees as paisa
         'is_free' => false,
         'is_approved' => true,
     ]);
@@ -122,7 +122,7 @@ test('user can access free content without purchase', function () {
 
 test('user can access purchased content', function () {
     $course = Course::factory()->create([
-        'price' => 99.99,
+        'price' => 9999, // 99.99 rupees as paisa
         'is_free' => false,
     ]);
 
@@ -138,7 +138,7 @@ test('user can access purchased content', function () {
 
 test('user cannot access unpurchased paid content', function () {
     $course = Course::factory()->create([
-        'price' => 99.99,
+        'price' => 9999, // 99.99 rupees as paisa
         'is_free' => false,
     ]);
 
@@ -147,7 +147,7 @@ test('user cannot access unpurchased paid content', function () {
 
 test('admin can access all content', function () {
     $course = Course::factory()->create([
-        'price' => 99.99,
+        'price' => 9999, // 99.99 rupees as paisa
         'is_free' => false,
     ]);
 
@@ -157,7 +157,7 @@ test('admin can access all content', function () {
 test('coach can access their own content', function () {
     $course = Course::factory()->create([
         'coach_id' => $this->coach->id,
-        'price' => 99.99,
+        'price' => 9999, // 99.99 rupees as paisa
         'is_free' => false,
     ]);
 
@@ -168,9 +168,44 @@ test('coach cannot access other coaches paid content without purchase', function
     $otherCoach = User::factory()->create(['role' => 'coach']);
     $course = Course::factory()->create([
         'coach_id' => $otherCoach->id,
-        'price' => 99.99,
+        'price' => 9999, // 99.99 rupees as paisa
         'is_free' => false,
     ]);
 
     expect($this->coach->canAccess($course))->toBeFalse();
+});
+
+test('frontend-backend integration: purchase API rejects wrong parameter names', function () {
+    $course = Course::factory()->create([
+        'price' => 9999, // 99.99 rupees as paisa
+        'is_free' => false,
+        'is_approved' => true,
+    ]);
+
+    // Test with frontend's old incorrect parameter names (should fail)
+    $response = $this->actingAs($this->student)
+        ->post('/purchases', [
+            'purchasable_type' => 'course', // Wrong parameter name
+            'purchasable_id' => $course->id, // Wrong parameter name
+            'payment_provider' => 'stripe',
+        ]);
+
+    $response->assertSessionHasErrors(['type', 'id']);
+
+    // Test with correct parameter names (should work)
+    $response = $this->actingAs($this->student)
+        ->post('/purchases', [
+            'type' => 'course', // Correct parameter name
+            'id' => $course->id, // Correct parameter name
+            'payment_provider' => 'stripe',
+        ]);
+
+    $response->assertSessionHasErrors(); // Expect Stripe error in test environment
+
+    // Should create a purchase record despite Stripe failure
+    $this->assertDatabaseHas('purchases', [
+        'user_id' => $this->student->id,
+        'purchasable_type' => Course::class,
+        'purchasable_id' => $course->id,
+    ]);
 });

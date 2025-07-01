@@ -64,6 +64,52 @@
                     </p>
                 </div>
 
+                <!-- Pricing Section -->
+                <div class="mb-6">
+                    <div class="flex items-center mb-3">
+                        <input
+                            id="is_free"
+                            v-model="form.is_free"
+                            type="checkbox"
+                            class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <label for="is_free" class="ml-2 text-sm font-medium text-gray-700">
+                            This course is free
+                        </label>
+                    </div>
+                    
+                    <div v-if="!form.is_free" class="mb-4">
+                        <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
+                            Price (₹)
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">₹</span>
+                            </div>
+                            <input
+                                id="price"
+                                v-model="form.price"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="999999"
+                                placeholder="0.00"
+                                class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                :class="{ 'border-red-500': form.errors.price }"
+                            />
+                        </div>
+                        <div v-if="form.errors.price" class="text-red-600 text-sm mt-1">
+                            {{ form.errors.price }}
+                        </div>
+                        <p class="text-sm text-gray-500 mt-1">
+                            Enter the price in Indian Rupees (₹)
+                        </p>
+                    </div>
+                    <div v-if="form.errors.is_free" class="text-red-600 text-sm mt-1">
+                        {{ form.errors.is_free }}
+                    </div>
+                </div>
+
                 <!-- Module Selection - Admin Only -->
                 <div v-if="isAdmin && props.modules && props.modules.length > 0" class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -189,7 +235,9 @@ const form = useForm({
     theme_id: '',
     title: '',
     description: '',
-    module_ids: [] as string[]
+    module_ids: [] as string[],
+    price: null as number | null,
+    is_free: false
 })
 
 const submit = () => {

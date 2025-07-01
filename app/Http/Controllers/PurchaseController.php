@@ -61,8 +61,8 @@ class PurchaseController extends Controller
             'user_id' => Auth::id(),
             'purchasable_type' => $purchasableClass,
             'purchasable_id' => $purchasable->id,
-            'amount' => $purchasable->price,
-            'currency' => 'USD',
+            'amount' => $purchasable->price_in_rupees, // Store amount in rupees
+            'currency' => 'INR',
             'payment_provider' => $validated['payment_provider'],
             'status' => 'pending',
         ]);

@@ -65,10 +65,20 @@ class CourseController extends Controller
             'description' => 'required|string|max:2000',
             'module_ids' => 'nullable|array',
             'module_ids.*' => 'exists:modules,id',
+            'price' => 'nullable|numeric|min:0|max:999999',
+            'is_free' => 'boolean',
         ]);
 
         $validated['coach_id'] = auth()->id();
         $validated['is_approved'] = false; // Default to unapproved
+
+        // Convert price from rupees to paisa if provided
+        if (isset($validated['price']) && $validated['price'] !== null) {
+            $validated['price'] = (int) round($validated['price'] * 100);
+        }
+
+        // Ensure is_free is set correctly
+        $validated['is_free'] = $validated['is_free'] ?? false;
 
         $course = Course::create($validated);
 
@@ -140,7 +150,17 @@ class CourseController extends Controller
             'description' => 'required|string|max:2000',
             'module_ids' => 'nullable|array',
             'module_ids.*' => 'exists:modules,id',
+            'price' => 'nullable|numeric|min:0|max:999999',
+            'is_free' => 'boolean',
         ]);
+
+        // Convert price from rupees to paisa if provided
+        if (isset($validated['price']) && $validated['price'] !== null) {
+            $validated['price'] = (int) round($validated['price'] * 100);
+        }
+
+        // Ensure is_free is set correctly
+        $validated['is_free'] = $validated['is_free'] ?? false;
 
         $course->update($validated);
 

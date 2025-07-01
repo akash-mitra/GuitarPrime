@@ -17,7 +17,7 @@ class Course extends Model
         return [
             'is_approved' => 'boolean',
             'is_free' => 'boolean',
-            'price' => 'decimal:2',
+            'price' => 'integer', // Store as paisa (integer)
         ];
     }
 
@@ -74,6 +74,18 @@ class Course extends Model
             return 'Free';
         }
 
-        return '$'.number_format($this->price, 2);
+        // Convert paisa to rupees and format in INR
+        $priceInRupees = $this->price / 100;
+
+        return '₹'.number_format($priceInRupees, 2);
+    }
+
+    public function getPriceInRupeesAttribute(): float
+    {
+        if (is_null($this->price)) {
+            return 0;
+        }
+
+        return $this->price / 100;
     }
 }

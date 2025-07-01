@@ -118,7 +118,7 @@ describe('Course Access Control', function () {
             'coach_id' => $this->coach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 
@@ -131,7 +131,7 @@ describe('Course Access Control', function () {
             'coach_id' => $this->coach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 
@@ -143,7 +143,7 @@ describe('Course Access Control', function () {
             'coach_id' => $this->otherCoach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 
@@ -155,7 +155,7 @@ describe('Course Access Control', function () {
             'coach_id' => $this->otherCoach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 
@@ -187,7 +187,7 @@ describe('Course Access Control', function () {
             'coach_id' => $this->coach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 
@@ -199,7 +199,7 @@ describe('Course Access Control', function () {
             'coach_id' => $this->coach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 
@@ -248,7 +248,7 @@ describe('Frontend Integration', function () {
             'coach_id' => $this->coach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 
@@ -268,7 +268,7 @@ describe('Frontend Integration', function () {
             ->component('Courses/Show')
             ->where('canAccess', false) // Student doesn't have course access
             ->where('pricing.is_free', false)
-            ->where('pricing.price', '99.99')
+            ->where('pricing.price', 9999) // Price stored as paisa
             ->has('moduleAccess')
             ->where('moduleAccess.'.$freeModule->id, true) // Free module accessible
             ->where('moduleAccess.'.$paidModule->id, false) // Paid module not accessible
@@ -280,7 +280,7 @@ describe('Frontend Integration', function () {
             'coach_id' => $this->coach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 
@@ -338,7 +338,7 @@ describe('Course/Module Pricing Combinations', function () {
             'coach_id' => $this->coach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 
@@ -354,7 +354,7 @@ describe('Course/Module Pricing Combinations', function () {
             'coach_id' => $this->coach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 
@@ -370,7 +370,7 @@ describe('Course/Module Pricing Combinations', function () {
             'coach_id' => $this->coach->id,
             'theme_id' => $this->theme->id,
             'is_free' => false,
-            'price' => 99.99,
+            'price' => 9999, // 99.99 rupees as paisa
             'is_approved' => true,
         ]);
 

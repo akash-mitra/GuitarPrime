@@ -87,11 +87,13 @@ const buttonText = computed(() => {
     return 'Access Free Content'
   }
 
-  // Convert price to number and format it
+  // Convert price to number and format it in INR
   const numericPrice = typeof props.price === 'string' ? parseFloat(props.price) : props.price
-  const formattedPrice = numericPrice?.toFixed(2) || '0.00'
+  // Convert paisa to rupees and format
+  const priceInRupees = (numericPrice || 0) / 100
+  const formattedPrice = priceInRupees.toFixed(2)
 
-  return `Purchase for $${formattedPrice}`
+  return `Purchase for ₹${formattedPrice}`
 })
 
 const buttonClass = computed(() => props.class || '')
@@ -107,13 +109,15 @@ const handlePurchase = async () => {
       router.reload()
     } else {
       // For paid content, redirect to purchase flow
-      await router.post(route('purchases.store'), {
-        purchasable_type: props.purchasableType,
-        purchasable_id: props.purchasableId,
+      router.post(route('purchases.store'), {
+        type: props.purchasableType,
+        id: props.purchasableId,
+        payment_provider: 'stripe', // Default to Stripe for now
       })
     }
   } catch (error) {
     console.error('Purchase failed:', error)
+    // Error handling is managed by Inertia - validation errors will show up in the form
   } finally {
     loading.value = false
   }
