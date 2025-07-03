@@ -29,8 +29,11 @@ class CourseController extends Controller
                 return $query->approved();
             })
             ->when($user->role === 'coach', function ($query) use ($user) {
-                // Coaches can see their own courses (approved and pending)
-                return $query->where('coach_id', $user->id);
+                // Coaches can see all approved courses + their own unapproved courses
+                return $query->where(function ($subQuery) use ($user) {
+                    $subQuery->where('is_approved', true)
+                        ->orWhere('coach_id', $user->id);
+                });
             })
             // Admins can see all courses (no additional filtering)
             ->latest()
