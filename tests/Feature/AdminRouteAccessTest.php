@@ -28,11 +28,11 @@ test('admin can access themes edit route', function () {
     $response->assertOk();
 });
 
-test('coach can access themes/create route', function () {
+test('coach cannot access themes/create route', function () {
     $response = $this->actingAs($this->coach)
         ->get('/themes/create');
 
-    $response->assertOk();
+    $response->assertForbidden();
 });
 
 test('student cannot access themes/create route', function () {

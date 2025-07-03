@@ -6,7 +6,7 @@
             <div class="flex items-center justify-between">
                 <h1 class="text-2xl font-semibold">Themes</h1>
                 <Link
-                    v-if="$page.props.auth.user.role !== 'student'"
+                    v-if="$page.props.auth.user.role === 'admin'"
                     :href="route('themes.create')"
                     class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
                 >

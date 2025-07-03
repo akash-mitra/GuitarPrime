@@ -62,7 +62,7 @@ defineEmits<{
 const page = usePage();
 
 const canEdit = computed(() => {
-    return page.props.auth.user.role !== 'student';
+    return page.props.auth.user.role === 'admin';
 });
 
 const canDelete = computed(() => {

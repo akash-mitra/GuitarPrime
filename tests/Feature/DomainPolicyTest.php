@@ -5,11 +5,13 @@ use App\Models\Module;
 use App\Models\Theme;
 use App\Models\User;
 
-test('coach can create theme but student cannot', function () {
+test('only admin can create theme', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
     $coach = User::factory()->create(['role' => 'coach']);
     $student = User::factory()->create(['role' => 'student']);
 
-    expect($coach->can('create', Theme::class))->toBeTrue();
+    expect($admin->can('create', Theme::class))->toBeTrue();
+    expect($coach->can('create', Theme::class))->toBeFalse();
     expect($student->can('create', Theme::class))->toBeFalse();
 });
 
