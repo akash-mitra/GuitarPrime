@@ -13,16 +13,25 @@ class ModuleController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Module::class);
 
+        $search = $request->get('search');
+
         $modules = Module::withCount('attachments')
+            ->when($search, function ($query, $search) {
+                return $query->where('title', 'like', "%{$search}%");
+            })
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->appends($request->query());
 
         return Inertia::render('modules/Index', [
             'modules' => $modules,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 

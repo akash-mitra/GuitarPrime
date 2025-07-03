@@ -2,9 +2,9 @@
     <Head :title="`${module.title} - ${course.title}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 max-w-7xl mx-auto">
+        <div class="mx-auto flex h-full max-w-7xl flex-1 flex-col gap-4 rounded-xl p-4">
             <!-- Course context header -->
-            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-4">
+            <div class="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
                 <div class="flex items-center justify-between">
                     <div>
                         <h2 class="text-lg font-semibold text-gray-900">{{ course.title }}</h2>
@@ -14,9 +14,9 @@
                         <span
                             :class="{
                                 'bg-green-100 text-green-800': coursePricing.is_free,
-                                'bg-blue-100 text-blue-800': !coursePricing.is_free
+                                'bg-blue-100 text-blue-800': !coursePricing.is_free,
                             }"
-                            class="px-2 py-1 text-sm font-medium rounded"
+                            class="rounded px-2 py-1 text-sm font-medium"
                         >
                             {{ coursePricing.formatted_price }}
                         </span>
@@ -24,27 +24,22 @@
                 </div>
             </div>
 
-            <div class="flex justify-between items-start">
+            <div class="flex items-start justify-between">
                 <div class="flex-1">
-                    <div class="flex items-center space-x-3 mb-4">
+                    <div class="mb-4 flex items-center space-x-3">
                         <h1 class="text-2xl font-semibold">{{ module.title }}</h1>
                         <span
                             :class="{
                                 'bg-green-100 text-green-800': module.difficulty === 'easy',
                                 'bg-yellow-100 text-yellow-800': module.difficulty === 'medium',
-                                'bg-red-100 text-red-800': module.difficulty === 'hard'
-                              }"
-                            class="px-2 py-1 text-sm font-medium rounded"
+                                'bg-red-100 text-red-800': module.difficulty === 'hard',
+                            }"
+                            class="rounded px-2 py-1 text-sm font-medium"
                         >
                             {{ module.difficulty }}
                         </span>
                         <!-- Free module badge -->
-                        <span
-                            v-if="module.is_free"
-                            class="bg-green-100 text-green-800 px-2 py-1 text-sm font-medium rounded"
-                        >
-                            Free Demo
-                        </span>
+                        <span v-if="module.is_free" class="rounded bg-green-100 px-2 py-1 text-sm font-medium text-green-800"> Free Demo </span>
                     </div>
                     <!-- Protected Video Player -->
                     <ProtectedVideoPlayer
@@ -55,7 +50,7 @@
                         :purchasable-id="course.id"
                         :pricing="coursePricing"
                     />
-                    <p class="text-gray-600 mb-4">{{ module.description }}</p>
+                    <p class="mb-4 text-gray-600">{{ module.description }}</p>
                 </div>
 
                 <div class="flex space-x-3">
@@ -66,21 +61,18 @@
                         :purchasable-id="course.id"
                         :price="coursePricing.price"
                         :is-free="coursePricing.is_free"
-                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                        class="rounded bg-green-600 px-4 py-2 font-bold text-white hover:bg-green-700"
                     >
                         Buy Course
                     </PurchaseButton>
 
-                    <Link
-                        :href="route('courses.show', course.id)"
-                        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-                    >
+                    <Link :href="route('courses.show', course.id)" class="rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700">
                         Back to Course
                     </Link>
                     <Link
                         v-if="canEdit"
                         :href="route('modules.edit', module.id)"
-                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
                     >
                         Edit Module
                     </Link>
@@ -110,79 +102,78 @@
 </template>
 
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue'
-import PaywallCard from '@/components/PaywallCard.vue'
-import PurchaseButton from '@/components/PurchaseButton.vue'
-import ProtectedVideoPlayer from '@/components/ProtectedVideoPlayer.vue'
-import ProtectedAttachmentList from '@/components/ProtectedAttachmentList.vue'
-import { Head, Link, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
-import type { BreadcrumbItem } from '@/types'
+import PaywallCard from '@/components/PaywallCard.vue';
+import ProtectedAttachmentList from '@/components/ProtectedAttachmentList.vue';
+import ProtectedVideoPlayer from '@/components/ProtectedVideoPlayer.vue';
+import PurchaseButton from '@/components/PurchaseButton.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import type { BreadcrumbItem } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 interface Attachment {
-    id: string
-    filename: string
-    size: number
-    mime_type: string
+    id: string;
+    filename: string;
+    size: number;
+    mime_type: string;
 }
 
 interface User {
-    id: number
-    name: string
-    email: string
-    role: string
+    id: number;
+    name: string;
+    email: string;
+    role: string;
 }
 
 interface Theme {
-    id: string
-    name: string
+    id: string;
+    name: string;
 }
 
 interface Course {
-    id: string
-    title: string
-    description: string
-    is_approved: boolean
-    coach_id: number
-    theme: Theme
-    coach: User
+    id: string;
+    title: string;
+    description: string;
+    is_approved: boolean;
+    coach_id: number;
+    theme: Theme;
+    coach: User;
 }
 
 interface Module {
-    id: string
-    title: string
-    description: string
-    difficulty: 'easy' | 'medium' | 'hard'
-    video_url?: string
-    is_free: boolean
-    attachments?: Attachment[]
+    id: string;
+    title: string;
+    description: string;
+    difficulty: 'easy' | 'medium' | 'hard';
+    video_url?: string;
+    is_free: boolean;
+    attachments?: Attachment[];
 }
 
 interface Pricing {
-    price?: number
-    is_free: boolean
-    formatted_price: string
+    price?: number;
+    is_free: boolean;
+    formatted_price: string;
 }
 
 const props = defineProps<{
-    course: Course
-    module: Module
-    canAccessCourse: boolean
-    canAccessModule: boolean
-    coursePricing: Pricing
-}>()
+    course: Course;
+    module: Module;
+    canAccessCourse: boolean;
+    canAccessModule: boolean;
+    coursePricing: Pricing;
+}>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Courses', href: '/courses' },
     { title: props.course.title, href: `/courses/${props.course.id}` },
-    { title: props.module.title, href: `/courses/${props.course.id}/modules/${props.module.id}` }
-]
+    { title: props.module.title, href: `/courses/${props.course.id}/modules/${props.module.id}` },
+];
 
-const { auth } = usePage().props
+const { auth } = usePage().props;
 
 const canEdit = computed(() => {
-    return auth.user.role === 'admin' || 
-           (auth.user.role === 'coach' && props.course.coach_id === auth.user.id)
-})
+    return auth.user.role === 'admin' || (auth.user.role === 'coach' && props.course.coach_id === auth.user.id);
+});
 </script>

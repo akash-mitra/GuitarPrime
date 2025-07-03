@@ -20,7 +20,8 @@
       "Bash(npx eslint:*)",
       "Bash(grep:*)",
       "Bash(./vendor/bin/pint:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm run format:*)"
     ],
     "deny": []
   }

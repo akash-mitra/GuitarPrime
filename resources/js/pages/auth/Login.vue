@@ -84,13 +84,9 @@ const submit = () => {
                 </Button>
 
                 <!-- Social Login Buttons -->
-                <div class="flex flex-col gap-3 mt-4">
-                    <Button type="button" class="w-full" as="a" href="/auth/google">
-                        Login with Google
-                    </Button>
-                    <Button type="button" class="w-full" as="a" href="/auth/facebook">
-                        Login with Facebook
-                    </Button>
+                <div class="mt-4 flex flex-col gap-3">
+                    <Button type="button" class="w-full" as="a" href="/auth/google"> Login with Google </Button>
+                    <Button type="button" class="w-full" as="a" href="/auth/facebook"> Login with Facebook </Button>
                 </div>
             </div>
 

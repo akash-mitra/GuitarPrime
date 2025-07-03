@@ -13,13 +13,17 @@ class CourseController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Course::class);
 
         $user = auth()->user();
+        $search = $request->get('search');
 
         $courses = Course::with(['theme', 'coach'])
+            ->when($search, function ($query, $search) {
+                return $query->where('title', 'like', "%{$search}%");
+            })
             ->when($user->role === 'student', function ($query) {
                 // Students can only see approved courses
                 return $query->approved();
@@ -30,10 +34,14 @@ class CourseController extends Controller
             })
             // Admins can see all courses (no additional filtering)
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->appends($request->query());
 
         return Inertia::render('Courses/Index', [
             'courses' => $courses,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 

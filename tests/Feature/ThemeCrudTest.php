@@ -170,9 +170,9 @@ test('theme show page displays approved courses only', function () {
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('Themes/Show')
-        ->has('theme.courses', 1) // Only approved course
-        ->where('theme.courses.0.title', 'Approved Course')
-        ->where('theme.courses.0.id', $approvedCourse->id)
+        ->has('courses.data', 1) // Only approved course
+        ->where('courses.data.0.title', 'Approved Course')
+        ->where('courses.data.0.id', $approvedCourse->id)
     );
 });
 
@@ -192,8 +192,8 @@ test('theme show page loads courses with coach information', function () {
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('Themes/Show')
-        ->has('theme.courses', 1)
-        ->where('theme.courses.0.coach.name', 'John Coach')
-        ->where('theme.courses.0.coach.id', $coach->id)
+        ->has('courses.data', 1)
+        ->where('courses.data.0.coach.name', 'John Coach')
+        ->where('courses.data.0.coach.id', $coach->id)
     );
 });

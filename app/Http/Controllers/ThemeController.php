@@ -11,14 +11,25 @@ class ThemeController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Theme::class);
 
-        $themes = Theme::withCount('courses')->latest()->paginate(10);
+        $search = $request->get('search');
+
+        $themes = Theme::withCount('courses')
+            ->when($search, function ($query, $search) {
+                return $query->where('name', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->appends($request->query());
 
         return Inertia::render('Themes/Index', [
             'themes' => $themes,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -44,16 +55,28 @@ class ThemeController extends Controller
             ->with('success', 'Theme created successfully.');
     }
 
-    public function show(Theme $theme)
+    public function show(Request $request, Theme $theme)
     {
         $this->authorize('view', $theme);
 
-        $theme->load(['courses' => function ($query) {
-            $query->where('is_approved', true)->with('coach');
-        }]);
+        $search = $request->get('search');
+
+        $courses = $theme->courses()
+            ->where('is_approved', true)
+            ->with('coach')
+            ->when($search, function ($query, $search) {
+                return $query->where('title', 'like', "%{$search}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->appends($request->query());
 
         return Inertia::render('Themes/Show', [
             'theme' => $theme,
+            'courses' => $courses,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
