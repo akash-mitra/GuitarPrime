@@ -44,7 +44,7 @@ class ModuleFactory extends Factory
     public function withVideo()
     {
         return $this->state(fn (array $attributes) => [
-            'video_url' => 'https://vimeo.com/' . $this->faker->numberBetween(100000000, 999999999),
+            'video_url' => 'https://vimeo.com/'.$this->faker->numberBetween(100000000, 999999999),
         ]);
     }
 

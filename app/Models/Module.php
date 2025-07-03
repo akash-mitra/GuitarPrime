@@ -10,7 +10,7 @@ class Module extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $fillable = ['title', 'description', 'difficulty', 'video_url', 'cover_image'];
+    protected $fillable = ['title', 'description', 'difficulty', 'video_url', 'cover_image', 'is_free'];
 
     public function courses()
     {
@@ -22,8 +22,25 @@ class Module extends Model
         return $this->hasMany(Attachment::class);
     }
 
+    protected function casts(): array
+    {
+        return [
+            'is_free' => 'boolean',
+        ];
+    }
+
     public function scopeByDifficulty($query, $difficulty)
     {
         return $query->where('difficulty', $difficulty);
+    }
+
+    public function scopeFree($query)
+    {
+        return $query->where('is_free', true);
+    }
+
+    public function isFree(): bool
+    {
+        return $this->is_free;
     }
 }

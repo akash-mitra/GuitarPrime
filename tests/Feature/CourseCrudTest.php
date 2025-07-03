@@ -19,12 +19,13 @@ test('coach can view courses index', function () {
     );
 });
 
-test('student cannot access courses index', function () {
+test('student can access courses index for browsing', function () {
     $student = User::factory()->create(['role' => 'student']);
 
     $response = $this->actingAs($student)->get(route('courses.index'));
 
-    $response->assertStatus(403);
+    // Students can now browse courses
+    $response->assertStatus(200);
 });
 
 test('coach can create course with default unapproved status', function () {
@@ -34,7 +35,7 @@ test('coach can create course with default unapproved status', function () {
     $response = $this->actingAs($coach)->post(route('courses.store'), [
         'theme_id' => $theme->id,
         'title' => 'Guitar Fundamentals',
-        'description' => 'Learn the basics of guitar playing'
+        'description' => 'Learn the basics of guitar playing',
     ]);
 
     $response->assertRedirect(route('courses.index'));
@@ -51,7 +52,7 @@ test('coach cannot approve their own course', function () {
     $course = Course::factory()->create([
         'coach_id' => $coach->id,
         'theme_id' => $theme->id,
-        'is_approved' => false
+        'is_approved' => false,
     ]);
 
     $response = $this->actingAs($coach)->post(route('courses.approve', $course));
@@ -67,7 +68,7 @@ test('admin can approve course', function () {
     $course = Course::factory()->create([
         'coach_id' => $coach->id,
         'theme_id' => $theme->id,
-        'is_approved' => false
+        'is_approved' => false,
     ]);
 
     $response = $this->actingAs($admin)->post(route('courses.approve', $course));
@@ -82,13 +83,13 @@ test('coach can edit own course', function () {
     $course = Course::factory()->create([
         'coach_id' => $coach->id,
         'theme_id' => $theme->id,
-        'title' => 'Original Title'
+        'title' => 'Original Title',
     ]);
 
     $response = $this->actingAs($coach)->put(route('courses.update', $course), [
         'theme_id' => $theme->id,
         'title' => 'Updated Title',
-        'description' => 'Updated description'
+        'description' => 'Updated description',
     ]);
 
     $response->assertRedirect(route('courses.index'));
@@ -101,13 +102,13 @@ test('coach cannot edit another coaches course', function () {
     $theme = Theme::factory()->create();
     $course = Course::factory()->create([
         'coach_id' => $coach1->id,
-        'theme_id' => $theme->id
+        'theme_id' => $theme->id,
     ]);
 
     $response = $this->actingAs($coach2)->put(route('courses.update', $course), [
         'theme_id' => $theme->id,
         'title' => 'Hacked Title',
-        'description' => 'Hacked description'
+        'description' => 'Hacked description',
     ]);
 
     $response->assertStatus(403);
@@ -122,14 +123,14 @@ test('admin can view approval queue', function () {
     Course::factory()->create([
         'coach_id' => $coach->id,
         'theme_id' => $theme->id,
-        'is_approved' => false
+        'is_approved' => false,
     ]);
 
     // Create approved course (should not appear in queue)
     Course::factory()->create([
         'coach_id' => $coach->id,
         'theme_id' => $theme->id,
-        'is_approved' => true
+        'is_approved' => true,
     ]);
 
     $response = $this->actingAs($admin)->get(route('courses.approval-queue'));
@@ -155,7 +156,7 @@ test('admin can delete course', function () {
     $theme = Theme::factory()->create();
     $course = Course::factory()->create([
         'coach_id' => $coach->id,
-        'theme_id' => $theme->id
+        'theme_id' => $theme->id,
     ]);
 
     $response = $this->actingAs($admin)->delete(route('courses.destroy', $course));
@@ -170,7 +171,7 @@ test('course validation works correctly', function () {
     $response = $this->actingAs($coach)->post(route('courses.store'), [
         'theme_id' => '', // Required
         'title' => '', // Required
-        'description' => '' // Required
+        'description' => '', // Required
     ]);
 
     $response->assertSessionHasErrors(['theme_id', 'title', 'description']);
@@ -183,7 +184,7 @@ test('coach can delete own unapproved course', function () {
         'coach_id' => $coach->id,
         'theme_id' => $theme->id,
         'is_approved' => false,
-        'title' => 'Unapproved Course'
+        'title' => 'Unapproved Course',
     ]);
 
     $response = $this->actingAs($coach)->delete(route('courses.destroy', $course));
@@ -199,7 +200,7 @@ test('coach cannot delete own approved course', function () {
         'coach_id' => $coach->id,
         'theme_id' => $theme->id,
         'is_approved' => true,
-        'title' => 'Approved Course'
+        'title' => 'Approved Course',
     ]);
 
     $response = $this->actingAs($coach)->delete(route('courses.destroy', $course));
@@ -216,7 +217,7 @@ test('coach cannot delete another coaches unapproved course', function () {
         'coach_id' => $coach1->id,
         'theme_id' => $theme->id,
         'is_approved' => false,
-        'title' => 'Other Coach Course'
+        'title' => 'Other Coach Course',
     ]);
 
     $response = $this->actingAs($coach2)->delete(route('courses.destroy', $course));
@@ -229,13 +230,13 @@ test('admin can delete any course regardless of approval status', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $coach = User::factory()->create(['role' => 'coach']);
     $theme = Theme::factory()->create();
-    
+
     // Test deleting approved course
     $approvedCourse = Course::factory()->create([
         'coach_id' => $coach->id,
         'theme_id' => $theme->id,
         'is_approved' => true,
-        'title' => 'Admin Delete Approved'
+        'title' => 'Admin Delete Approved',
     ]);
 
     $response = $this->actingAs($admin)->delete(route('courses.destroy', $approvedCourse));
@@ -247,7 +248,7 @@ test('admin can delete any course regardless of approval status', function () {
         'coach_id' => $coach->id,
         'theme_id' => $theme->id,
         'is_approved' => false,
-        'title' => 'Admin Delete Unapproved'
+        'title' => 'Admin Delete Unapproved',
     ]);
 
     $response = $this->actingAs($admin)->delete(route('courses.destroy', $unapprovedCourse));
@@ -268,7 +269,7 @@ test('admin can create course with modules', function () {
         'theme_id' => $theme->id,
         'title' => 'Course with Modules',
         'description' => 'A course that includes modules',
-        'module_ids' => [$module1->id, $module3->id, $module2->id] // Order matters
+        'module_ids' => [$module1->id, $module3->id, $module2->id], // Order matters
     ]);
 
     $response->assertRedirect(route('courses.index'));
@@ -281,19 +282,19 @@ test('admin can create course with modules', function () {
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module1->id,
-        'order' => 1
+        'order' => 1,
     ]);
-    
+
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module3->id,
-        'order' => 2
+        'order' => 2,
     ]);
-    
+
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module2->id,
-        'order' => 3
+        'order' => 3,
     ]);
 
     // Verify the course has 3 modules
@@ -308,7 +309,7 @@ test('admin can create course without modules', function () {
         'theme_id' => $theme->id,
         'title' => 'Course without Modules',
         'description' => 'A course with no modules',
-        'module_ids' => []
+        'module_ids' => [],
     ]);
 
     $response->assertRedirect(route('courses.index'));
@@ -327,14 +328,14 @@ test('coach cannot create course with modules', function () {
         'theme_id' => $theme->id,
         'title' => 'Coach Course with Modules',
         'description' => 'A coach trying to add modules',
-        'module_ids' => [$module->id]
+        'module_ids' => [$module->id],
     ]);
 
     $response->assertRedirect(route('courses.index'));
 
     $course = Course::where('title', 'Coach Course with Modules')->first();
     expect($course)->not->toBeNull();
-    
+
     // Coach's module_ids should be ignored
     expect($course->modules()->count())->toBe(0);
 });
@@ -351,7 +352,7 @@ test('admin can update course modules', function () {
     $course = Course::factory()->create([
         'theme_id' => $theme->id,
         'coach_id' => $admin->id,
-        'title' => 'Test Course'
+        'title' => 'Test Course',
     ]);
 
     // Attach initial modules
@@ -363,7 +364,7 @@ test('admin can update course modules', function () {
         'theme_id' => $theme->id,
         'title' => 'Updated Course',
         'description' => 'Updated description',
-        'module_ids' => [$module3->id, $module4->id, $module1->id] // New order and modules
+        'module_ids' => [$module3->id, $module4->id, $module1->id], // New order and modules
     ]);
 
     $response->assertRedirect(route('courses.index'));
@@ -371,26 +372,26 @@ test('admin can update course modules', function () {
     // Check old modules are removed
     $this->assertDatabaseMissing('course_module_map', [
         'course_id' => $course->id,
-        'module_id' => $module2->id
+        'module_id' => $module2->id,
     ]);
 
     // Check new modules are added with correct order
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module3->id,
-        'order' => 1
+        'order' => 1,
     ]);
-    
+
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module4->id,
-        'order' => 2
+        'order' => 2,
     ]);
-    
+
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module1->id,
-        'order' => 3
+        'order' => 3,
     ]);
 
     expect($course->fresh()->modules()->count())->toBe(3);
@@ -405,7 +406,7 @@ test('admin can remove all modules from course', function () {
     // Create course with modules
     $course = Course::factory()->create([
         'theme_id' => $theme->id,
-        'coach_id' => $admin->id
+        'coach_id' => $admin->id,
     ]);
 
     $course->modules()->attach($module1->id, ['order' => 1]);
@@ -416,7 +417,7 @@ test('admin can remove all modules from course', function () {
         'theme_id' => $theme->id,
         'title' => $course->title,
         'description' => $course->description,
-        'module_ids' => []
+        'module_ids' => [],
     ]);
 
     $response->assertRedirect(route('courses.index'));
@@ -424,12 +425,12 @@ test('admin can remove all modules from course', function () {
     // Check all modules are removed
     $this->assertDatabaseMissing('course_module_map', [
         'course_id' => $course->id,
-        'module_id' => $module1->id
+        'module_id' => $module1->id,
     ]);
-    
+
     $this->assertDatabaseMissing('course_module_map', [
         'course_id' => $course->id,
-        'module_id' => $module2->id
+        'module_id' => $module2->id,
     ]);
 
     expect($course->fresh()->modules()->count())->toBe(0);
@@ -444,7 +445,7 @@ test('coach cannot update course modules', function () {
     // Create course with initial modules (would be done by admin)
     $course = Course::factory()->create([
         'theme_id' => $theme->id,
-        'coach_id' => $coach->id
+        'coach_id' => $coach->id,
     ]);
 
     $course->modules()->attach($module1->id, ['order' => 1]);
@@ -454,7 +455,7 @@ test('coach cannot update course modules', function () {
         'theme_id' => $theme->id,
         'title' => 'Updated by Coach',
         'description' => 'Updated description',
-        'module_ids' => [$module2->id] // Should be ignored
+        'module_ids' => [$module2->id], // Should be ignored
     ]);
 
     $response->assertRedirect(route('courses.index'));
@@ -463,13 +464,13 @@ test('coach cannot update course modules', function () {
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module1->id,
-        'order' => 1
+        'order' => 1,
     ]);
 
     // New module should not be added
     $this->assertDatabaseMissing('course_module_map', [
         'course_id' => $course->id,
-        'module_id' => $module2->id
+        'module_id' => $module2->id,
     ]);
 
     expect($course->fresh()->modules()->count())->toBe(1);
@@ -484,7 +485,7 @@ test('module_ids validation works correctly', function () {
         'theme_id' => $theme->id,
         'title' => 'Test Course',
         'description' => 'Test description',
-        'module_ids' => ['invalid-id', 'another-invalid-id']
+        'module_ids' => ['invalid-id', 'another-invalid-id'],
     ]);
 
     $response->assertSessionHasErrors(['module_ids.0', 'module_ids.1']);
@@ -498,7 +499,7 @@ test('module_ids field accepts null and empty array', function () {
     $response = $this->actingAs($admin)->post(route('courses.store'), [
         'theme_id' => $theme->id,
         'title' => 'Course with null modules',
-        'description' => 'Test description'
+        'description' => 'Test description',
         // module_ids is not provided (null)
     ]);
 
@@ -517,18 +518,18 @@ test('admin can create course with single module', function () {
         'theme_id' => $theme->id,
         'title' => 'Single Module Course',
         'description' => 'Course with one module',
-        'module_ids' => [$module->id]
+        'module_ids' => [$module->id],
     ]);
 
     $response->assertRedirect(route('courses.index'));
 
     $course = Course::where('title', 'Single Module Course')->first();
     expect($course->modules()->count())->toBe(1);
-    
+
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module->id,
-        'order' => 1
+        'order' => 1,
     ]);
 });
 
@@ -541,7 +542,7 @@ test('module order is preserved during course update', function () {
 
     $course = Course::factory()->create([
         'theme_id' => $theme->id,
-        'coach_id' => $admin->id
+        'coach_id' => $admin->id,
     ]);
 
     // Initial order: module1, module2, module3
@@ -554,7 +555,7 @@ test('module order is preserved during course update', function () {
         'theme_id' => $theme->id,
         'title' => $course->title,
         'description' => $course->description,
-        'module_ids' => [$module3->id, $module1->id, $module2->id]
+        'module_ids' => [$module3->id, $module1->id, $module2->id],
     ]);
 
     $response->assertRedirect(route('courses.index'));
@@ -563,18 +564,18 @@ test('module order is preserved during course update', function () {
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module3->id,
-        'order' => 1
+        'order' => 1,
     ]);
-    
+
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module1->id,
-        'order' => 2
+        'order' => 2,
     ]);
-    
+
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module2->id,
-        'order' => 3
+        'order' => 3,
     ]);
 });

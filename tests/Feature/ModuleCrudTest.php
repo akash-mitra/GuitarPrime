@@ -18,11 +18,12 @@ test('coach can view modules index', function () {
     );
 });
 
-test('student cannot access modules index', function () {
+test('student cannot access modules index (admin/coach only)', function () {
     $student = User::factory()->create(['role' => 'student']);
 
     $response = $this->actingAs($student)->get(route('modules.index'));
 
+    // Students cannot access modules index directly
     $response->assertStatus(403);
 });
 
@@ -33,13 +34,13 @@ test('coach can create module', function () {
         'title' => 'Guitar Scales',
         'description' => 'Learn basic guitar scales',
         'difficulty' => 'medium',
-        'video_url' => 'https://vimeo.com/123456789'
+        'video_url' => 'https://vimeo.com/123456789',
     ]);
 
     $response->assertRedirect(route('modules.index'));
     $this->assertDatabaseHas('modules', [
         'title' => 'Guitar Scales',
-        'difficulty' => 'medium'
+        'difficulty' => 'medium',
     ]);
 });
 
@@ -49,7 +50,7 @@ test('student cannot create module', function () {
     $response = $this->actingAs($student)->post(route('modules.store'), [
         'title' => 'Guitar Scales',
         'description' => 'Learn basic guitar scales',
-        'difficulty' => 'medium'
+        'difficulty' => 'medium',
     ]);
 
     $response->assertStatus(403);
@@ -62,14 +63,14 @@ test('coach can edit module', function () {
     $response = $this->actingAs($coach)->put(route('modules.update', $module), [
         'title' => 'Updated Title',
         'description' => 'Updated description',
-        'difficulty' => 'hard'
+        'difficulty' => 'hard',
     ]);
 
     $response->assertRedirect(route('modules.index'));
     $this->assertDatabaseHas('modules', [
         'id' => $module->id,
         'title' => 'Updated Title',
-        'difficulty' => 'hard'
+        'difficulty' => 'hard',
     ]);
 });
 
@@ -100,7 +101,7 @@ test('module validation works correctly', function () {
         'title' => '', // Required
         'description' => '', // Required
         'difficulty' => 'invalid', // Invalid value
-        'video_url' => 'not-a-url' // Invalid URL
+        'video_url' => 'not-a-url', // Invalid URL
     ]);
 
     $response->assertSessionHasErrors(['title', 'description', 'difficulty', 'video_url']);
@@ -114,7 +115,7 @@ test('vimeo url validation works correctly', function () {
         'title' => 'Test Module',
         'description' => 'Test description',
         'difficulty' => 'easy',
-        'video_url' => 'https://vimeo.com/123456789'
+        'video_url' => 'https://vimeo.com/123456789',
     ]);
 
     $response->assertRedirect(route('modules.index'));
@@ -124,7 +125,7 @@ test('vimeo url validation works correctly', function () {
         'title' => 'Test Module 2',
         'description' => 'Test description',
         'difficulty' => 'easy',
-        'video_url' => 'https://youtube.com/watch?v=123'
+        'video_url' => 'https://youtube.com/watch?v=123',
     ]);
 
     $response->assertSessionHasErrors(['video_url']);
@@ -135,7 +136,7 @@ test('coach can reorder modules in course', function () {
     $theme = Theme::factory()->create();
     $course = Course::factory()->create([
         'theme_id' => $theme->id,
-        'coach_id' => $coach->id
+        'coach_id' => $coach->id,
     ]);
 
     $module1 = Module::factory()->create();
@@ -153,8 +154,8 @@ test('coach can reorder modules in course', function () {
         'modules' => [
             ['id' => $module3->id, 'order' => 1],
             ['id' => $module1->id, 'order' => 2],
-            ['id' => $module2->id, 'order' => 3]
-        ]
+            ['id' => $module2->id, 'order' => 3],
+        ],
     ]);
 
     $response->assertRedirect();
@@ -163,19 +164,19 @@ test('coach can reorder modules in course', function () {
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module3->id,
-        'order' => 1
+        'order' => 1,
     ]);
 
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module1->id,
-        'order' => 2
+        'order' => 2,
     ]);
 
     $this->assertDatabaseHas('course_module_map', [
         'course_id' => $course->id,
         'module_id' => $module2->id,
-        'order' => 3
+        'order' => 3,
     ]);
 });
 
@@ -188,8 +189,8 @@ test('student cannot reorder modules', function () {
     $response = $this->actingAs($student)->post(route('modules.reorder'), [
         'course_id' => $course->id,
         'modules' => [
-            ['id' => $module->id, 'order' => 1]
-        ]
+            ['id' => $module->id, 'order' => 1],
+        ],
     ]);
 
     $response->assertStatus(403);
@@ -200,7 +201,7 @@ test('reorder validation works correctly', function () {
 
     $response = $this->actingAs($coach)->post(route('modules.reorder'), [
         'course_id' => '', // Required
-        'modules' => [] // Required array
+        'modules' => [], // Required array
     ]);
 
     $response->assertSessionHasErrors(['course_id', 'modules']);

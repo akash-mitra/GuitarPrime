@@ -9,16 +9,18 @@ use Socialite;
 
 class SocialiteLoginController extends Controller
 {
-    public function redirectToProvider($provider) {
+    public function redirectToProvider($provider)
+    {
         return Socialite::driver($provider)->redirect();
     }
 
-    public function handleProviderCallback($provider) {
+    public function handleProviderCallback($provider)
+    {
         $user = Socialite::driver($provider)->user();
-        
+
         $authUser = User::firstOrCreate(
-             ['email' => $user->getEmail()],
-             ['name' => $user->getName()]
+            ['email' => $user->getEmail()],
+            ['name' => $user->getName()]
         );
 
         Auth::login($authUser);

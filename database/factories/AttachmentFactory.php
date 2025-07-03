@@ -2,10 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Attachment;
 use App\Models\Module;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Carbon;
 
 class AttachmentFactory extends Factory
 {
@@ -21,13 +19,13 @@ class AttachmentFactory extends Factory
         ];
 
         $fileType = $this->faker->randomElement($fileTypes);
-        $filename = $this->faker->words(3, true) . '.' . $fileType['extension'];
+        $filename = $this->faker->words(3, true).'.'.$fileType['extension'];
 
         return [
             'module_id' => Module::factory(),
             'filename' => $filename,
             'disk' => 'private',
-            'path' => 'attachments/' . $this->faker->uuid() . '/' . $filename,
+            'path' => 'attachments/'.$this->faker->uuid().'/'.$filename,
             'type' => 'file',
             'size' => $this->faker->numberBetween(1024, 5242880), // 1KB to 5MB
             'mime_type' => $fileType['mime'],
@@ -37,9 +35,9 @@ class AttachmentFactory extends Factory
     public function pdf(): static
     {
         return $this->state(fn (array $attributes) => [
-            'filename' => $this->faker->words(3, true) . '.pdf',
+            'filename' => $this->faker->words(3, true).'.pdf',
             'mime_type' => 'application/pdf',
-            'path' => 'attachments/' . $this->faker->uuid() . '/' . $this->faker->words(3, true) . '.pdf',
+            'path' => 'attachments/'.$this->faker->uuid().'/'.$this->faker->words(3, true).'.pdf',
         ]);
     }
 
@@ -49,9 +47,9 @@ class AttachmentFactory extends Factory
         $mime = $extension === 'jpg' ? 'image/jpeg' : 'image/png';
 
         return $this->state(fn (array $attributes) => [
-            'filename' => $this->faker->words(3, true) . '.' . $extension,
+            'filename' => $this->faker->words(3, true).'.'.$extension,
             'mime_type' => $mime,
-            'path' => 'attachments/' . $this->faker->uuid() . '/' . $this->faker->words(3, true) . '.' . $extension,
+            'path' => 'attachments/'.$this->faker->uuid().'/'.$this->faker->words(3, true).'.'.$extension,
         ]);
     }
 
@@ -66,9 +64,9 @@ class AttachmentFactory extends Factory
         $type = $this->faker->randomElement($types);
 
         return $this->state(fn (array $attributes) => [
-            'filename' => $this->faker->words(3, true) . '.' . $type['extension'],
+            'filename' => $this->faker->words(3, true).'.'.$type['extension'],
             'mime_type' => $type['mime'],
-            'path' => 'attachments/' . $this->faker->uuid() . '/' . $this->faker->words(3, true) . '.' . $type['extension'],
+            'path' => 'attachments/'.$this->faker->uuid().'/'.$this->faker->words(3, true).'.'.$type['extension'],
         ]);
     }
 }

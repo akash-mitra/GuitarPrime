@@ -6,7 +6,22 @@
       "Bash(npm run build:*)",
       "Bash(composer test:*)",
       "Bash(rg:*)",
-      "Bash(php artisan make:migration:*)"
+      "Bash(php artisan make:migration:*)",
+      "Bash(composer:*)",
+      "Bash(php artisan make:model:*)",
+      "Bash(mkdir:*)",
+      "Bash(php artisan make:controller:*)",
+      "Bash(php artisan make:job:*)",
+      "Bash(php artisan make:policy:*)",
+      "Bash(php artisan:*)",
+      "Bash(./vendor/bin/pint)",
+      "Bash(./vendor/bin/pest:*)",
+      "Bash(npm run lint)",
+      "Bash(npx eslint:*)",
+      "Bash(grep:*)",
+      "Bash(./vendor/bin/pint:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run format:*)"
     ],
     "deny": []
   }

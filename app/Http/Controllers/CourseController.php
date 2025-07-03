@@ -13,21 +13,35 @@ class CourseController extends Controller
 {
     use AuthorizesRequests;
 
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('viewAny', Course::class);
 
         $user = auth()->user();
+        $search = $request->get('search');
 
         $courses = Course::with(['theme', 'coach'])
+            ->when($search, function ($query, $search) {
+                return $query->where('title', 'like', "%{$search}%");
+            })
+            ->when($user->role === 'student', function ($query) {
+                // Students can only see approved courses
+                return $query->approved();
+            })
             ->when($user->role === 'coach', function ($query) use ($user) {
+                // Coaches can see their own courses (approved and pending)
                 return $query->where('coach_id', $user->id);
             })
+            // Admins can see all courses (no additional filtering)
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->appends($request->query());
 
         return Inertia::render('Courses/Index', [
-            'courses' => $courses
+            'courses' => $courses,
+            'filters' => [
+                'search' => $search,
+            ],
         ]);
     }
 
@@ -45,7 +59,7 @@ class CourseController extends Controller
 
         return Inertia::render('Courses/Create', [
             'themes' => $themes,
-            'modules' => $modules
+            'modules' => $modules,
         ]);
     }
 
@@ -58,16 +72,26 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:2000',
             'module_ids' => 'nullable|array',
-            'module_ids.*' => 'exists:modules,id'
+            'module_ids.*' => 'exists:modules,id',
+            'price' => 'nullable|numeric|min:0|max:999999',
+            'is_free' => 'boolean',
         ]);
 
         $validated['coach_id'] = auth()->id();
         $validated['is_approved'] = false; // Default to unapproved
 
+        // Convert price from rupees to paisa if provided
+        if (isset($validated['price']) && $validated['price'] !== null) {
+            $validated['price'] = (int) round($validated['price'] * 100);
+        }
+
+        // Ensure is_free is set correctly
+        $validated['is_free'] = $validated['is_free'] ?? false;
+
         $course = Course::create($validated);
 
         // Only admins can assign modules
-        if (auth()->user()->role === 'admin' && !empty($validated['module_ids'])) {
+        if (auth()->user()->role === 'admin' && ! empty($validated['module_ids'])) {
             // Attach modules with order based on array index
             $modulesWithOrder = [];
             foreach ($validated['module_ids'] as $index => $moduleId) {
@@ -88,8 +112,19 @@ class CourseController extends Controller
             $query->withPivot('order')->orderBy('course_module_map.order');
         }]);
 
+        $user = auth()->user();
+
         return Inertia::render('Courses/Show', [
-            'course' => $course
+            'course' => $course,
+            'canAccess' => $user->canAccess($course),
+            'pricing' => [
+                'price' => $course->price,
+                'is_free' => $course->is_free,
+                'formatted_price' => $course->formatted_price,
+            ],
+            'moduleAccess' => $course->modules->mapWithKeys(function ($module) use ($user) {
+                return [$module->id => $user->canAccess($module)];
+            }),
         ]);
     }
 
@@ -109,7 +144,7 @@ class CourseController extends Controller
         return Inertia::render('Courses/Edit', [
             'course' => $course,
             'themes' => $themes,
-            'modules' => $modules
+            'modules' => $modules,
         ]);
     }
 
@@ -122,8 +157,18 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'required|string|max:2000',
             'module_ids' => 'nullable|array',
-            'module_ids.*' => 'exists:modules,id'
+            'module_ids.*' => 'exists:modules,id',
+            'price' => 'nullable|numeric|min:0|max:999999',
+            'is_free' => 'boolean',
         ]);
+
+        // Convert price from rupees to paisa if provided
+        if (isset($validated['price']) && $validated['price'] !== null) {
+            $validated['price'] = (int) round($validated['price'] * 100);
+        }
+
+        // Ensure is_free is set correctly
+        $validated['is_free'] = $validated['is_free'] ?? false;
 
         $course->update($validated);
 
@@ -165,7 +210,7 @@ class CourseController extends Controller
 
     public function approvalQueue()
     {
-        $this->authorize('approve', new Course());
+        $this->authorize('approve', new Course);
 
         $courses = Course::with(['theme', 'coach'])
             ->pending()
@@ -173,7 +218,7 @@ class CourseController extends Controller
             ->paginate(10);
 
         return Inertia::render('Courses/ApprovalQueue', [
-            'courses' => $courses
+            'courses' => $courses,
         ]);
     }
 }

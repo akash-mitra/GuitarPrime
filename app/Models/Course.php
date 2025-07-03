@@ -10,12 +10,14 @@ class Course extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $fillable = ['theme_id', 'coach_id', 'title', 'description', 'is_approved', 'cover_image'];
+    protected $fillable = ['theme_id', 'coach_id', 'title', 'description', 'is_approved', 'cover_image', 'price', 'is_free'];
 
     protected function casts(): array
     {
         return [
             'is_approved' => 'boolean',
+            'is_free' => 'boolean',
+            'price' => 'integer', // Store as paisa (integer)
         ];
     }
 
@@ -33,12 +35,12 @@ class Course extends Model
     {
         return $this->belongsToMany(Module::class, 'course_module_map')
             ->withPivot('order')
-            ->orderBy('pivot_order');
+            ->orderBy('order');
     }
 
     public function purchases()
     {
-        return $this->hasMany(Purchase::class);
+        return $this->morphMany(Purchase::class, 'purchasable');
     }
 
     public function scopeApproved($query)
@@ -49,5 +51,41 @@ class Course extends Model
     public function scopePending($query)
     {
         return $query->where('is_approved', false);
+    }
+
+    public function scopeFree($query)
+    {
+        return $query->where('is_free', true)->orWhereNull('price');
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('is_free', false)->whereNotNull('price')->where('price', '>', 0);
+    }
+
+    public function isFree(): bool
+    {
+        return $this->is_free || is_null($this->price) || $this->price <= 0;
+    }
+
+    public function getFormattedPriceAttribute(): string
+    {
+        if ($this->isFree()) {
+            return 'Free';
+        }
+
+        // Convert paisa to rupees and format in INR
+        $priceInRupees = $this->price / 100;
+
+        return '₹'.number_format($priceInRupees, 2);
+    }
+
+    public function getPriceInRupeesAttribute(): float
+    {
+        if (is_null($this->price)) {
+            return 0;
+        }
+
+        return $this->price / 100;
     }
 }
