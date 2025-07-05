@@ -3,18 +3,32 @@
         <h3 class="mb-2 text-lg font-medium">Video</h3>
 
         <!-- Show video if user has access -->
-        <div v-if="canAccess" class="flex aspect-video items-center justify-center rounded-lg bg-gray-100">
-            <a :href="videoUrl" target="_blank" class="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
-                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                    />
-                </svg>
-                <span>Watch on Vimeo →</span>
-            </a>
+        <div v-if="canAccess" class="aspect-video rounded-lg bg-gray-100">
+            <!-- YouTube embedded player -->
+            <div v-if="isYouTubeUrl" class="h-full w-full">
+                <iframe
+                    :src="youTubeEmbedUrl"
+                    class="h-full w-full rounded-lg"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen
+                    title="YouTube video player"
+                ></iframe>
+            </div>
+            
+            <!-- Vimeo or other video links -->
+            <div v-else class="flex h-full items-center justify-center">
+                <a :href="videoUrl" target="_blank" class="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
+                    <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                        />
+                    </svg>
+                    <span>{{ isVimeoUrl ? 'Watch on Vimeo' : 'Watch Video' }} →</span>
+                </a>
+            </div>
         </div>
 
         <!-- Show paywall if user doesn't have access -->
@@ -65,6 +79,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import PurchaseButton from '@/components/PurchaseButton.vue';
 
 interface Props {
@@ -79,5 +94,46 @@ interface Props {
     };
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+// Helper function to extract YouTube video ID from URL
+const extractYouTubeId = (url: string): string | null => {
+    if (!url) return null;
+    
+    const patterns = [
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+        /(?:youtube\.com\/watch\?.*v=)([^&\n?#]+)/
+    ];
+    
+    for (const pattern of patterns) {
+        const match = url.match(pattern);
+        if (match && match[1]) {
+            return match[1];
+        }
+    }
+    
+    return null;
+};
+
+// Check if URL is from YouTube
+const isYouTubeUrl = computed(() => {
+    if (!props.videoUrl) return false;
+    return /(?:youtube\.com|youtu\.be)/.test(props.videoUrl);
+});
+
+// Check if URL is from Vimeo
+const isVimeoUrl = computed(() => {
+    if (!props.videoUrl) return false;
+    return /vimeo\.com/.test(props.videoUrl);
+});
+
+// Generate YouTube embed URL
+const youTubeEmbedUrl = computed(() => {
+    if (!props.videoUrl || !isYouTubeUrl.value) return '';
+    
+    const videoId = extractYouTubeId(props.videoUrl);
+    if (!videoId) return '';
+    
+    return `https://www.youtube.com/embed/${videoId}`;
+});
 </script>

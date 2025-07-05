@@ -24,6 +24,11 @@ class CoursePolicy
             return true;
         }
 
+        // Coaches can view other approved courses
+        if ($user->hasRole('coach') && $course->is_approved) {
+            return true;
+        }
+
         // Students can only view approved courses
         if ($user->hasRole('student')) {
             return $course->is_approved;

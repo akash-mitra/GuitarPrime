@@ -50,8 +50,8 @@
 
                     <div class="flex space-x-2">
                         <Link :href="route('modules.show', module.id)" class="text-sm text-blue-600 hover:text-blue-800"> View </Link>
-                        <Link :href="route('modules.edit', module.id)" class="text-sm text-green-600 hover:text-green-800"> Edit </Link>
-                        <button v-if="canDelete" @click="deleteModule(module)" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+                        <Link v-if="module.can_edit" :href="route('modules.edit', module.id)" class="text-sm text-green-600 hover:text-green-800"> Edit </Link>
+                        <button v-if="module.can_delete" @click="deleteModule(module)" class="text-sm text-red-600 hover:text-red-800">Delete</button>
                     </div>
                 </div>
             </div>
@@ -98,8 +98,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 
 interface Module {
     id: string;
@@ -108,6 +108,8 @@ interface Module {
     difficulty: 'easy' | 'medium' | 'hard';
     video_url?: string;
     attachments_count: number;
+    can_edit: boolean;
+    can_delete: boolean;
 }
 
 interface PaginatedModules {
@@ -154,11 +156,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Modules', href: '/modules' },
 ];
 
-const { auth } = usePage().props;
-
-const canDelete = computed(() => {
-    return auth.user.role === 'admin';
-});
 
 const deleteModule = (module: Module) => {
     if (confirm(`Are you sure you want to delete "${module.title}"?`)) {

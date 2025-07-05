@@ -31,7 +31,7 @@ test('student can only see approved courses in index', function () {
         ->get('/courses');
 
     $response->assertOk();
-    
+
     $courses = $response->getOriginalContent()->getData()['page']['props']['courses']['data'];
     expect($courses)->toHaveCount(1);
     expect($courses[0]['title'])->toBe('Approved Course');
@@ -44,7 +44,7 @@ test('coach can see all approved courses plus their own unapproved courses', fun
         'is_approved' => true,
         'title' => 'Approved by Other Coach',
     ]);
-    
+
     $approvedCourseByCoach = Course::factory()->create([
         'coach_id' => $this->coach->id,
         'is_approved' => true,
@@ -57,7 +57,7 @@ test('coach can see all approved courses plus their own unapproved courses', fun
         'is_approved' => false,
         'title' => 'Pending by This Coach',
     ]);
-    
+
     $pendingCourseByOther = Course::factory()->create([
         'is_approved' => false,
         'title' => 'Pending by Other Coach',
@@ -67,10 +67,10 @@ test('coach can see all approved courses plus their own unapproved courses', fun
         ->get('/courses');
 
     $response->assertOk();
-    
+
     $courses = $response->getOriginalContent()->getData()['page']['props']['courses']['data'];
     expect($courses)->toHaveCount(3);
-    
+
     $courseTitles = collect($courses)->pluck('title')->toArray();
     expect($courseTitles)->toContain('Approved by Other Coach');
     expect($courseTitles)->toContain('Approved by This Coach');
@@ -93,10 +93,10 @@ test('admin can see all courses regardless of approval status', function () {
         ->get('/courses');
 
     $response->assertOk();
-    
+
     $courses = $response->getOriginalContent()->getData()['page']['props']['courses']['data'];
     expect($courses)->toHaveCount(2);
-    
+
     $courseTitles = collect($courses)->pluck('title')->toArray();
     expect($courseTitles)->toContain('Approved Course');
     expect($courseTitles)->toContain('Pending Course');
