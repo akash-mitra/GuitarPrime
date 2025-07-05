@@ -24,8 +24,8 @@ require __DIR__.'/auth.php';
 Route::get('auth/{provider}', [App\Http\Controllers\Auth\SocialiteLoginController::class, 'redirectToProvider'])->name('oauth.redirect');
 Route::get('auth/{provider}/callback', [App\Http\Controllers\Auth\SocialiteLoginController::class, 'handleProviderCallback'])->name('oauth.callback');
 
-// Theme management - Admin and coach only (specific routes first)
-Route::middleware(['auth', 'role:admin,coach'])->group(function () {
+// Theme management - Admin only (specific routes first)
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('themes/create', [ThemeController::class, 'create'])->name('themes.create');
     Route::post('themes', [ThemeController::class, 'store'])->name('themes.store');
     Route::get('themes/{theme}/edit', [ThemeController::class, 'edit'])->name('themes.edit');

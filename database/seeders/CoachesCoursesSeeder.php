@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Attachment;
 use App\Models\Course;
 use App\Models\Module;
-use App\Models\Theme;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -16,86 +14,67 @@ class CoachesCoursesSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('Creating coaches with courses, modules, and attachments...');
+        $this->command->info('Mapping existing coaches to existing courses and modules...');
 
-        // Get existing themes
-        $themes = Theme::all();
+        // Get existing courses and modules
+        $courses = Course::all();
+        $modules = Module::all();
 
-        if ($themes->isEmpty()) {
-            $this->command->error('No themes found. Please run GuitarPrimeDataSeeder first.');
+        if ($courses->isEmpty()) {
+            $this->command->error('No courses found. Please run GuitarPrimeDataSeeder first.');
 
             return;
         }
 
-        // Create 3 coaches
-        $coaches = User::factory()->count(3)->create([
-            'role' => 'coach',
-            'email_verified_at' => now(),
-        ]);
+        if ($modules->isEmpty()) {
+            $this->command->error('No modules found. Please run GuitarPrimeDataSeeder first.');
 
-        foreach ($coaches as $index => $coach) {
-            $this->command->info("Creating courses for coach: {$coach->name}");
+            return;
+        }
 
-            // Each coach gets 5 courses
-            for ($courseIndex = 1; $courseIndex <= 5; $courseIndex++) {
-                $theme = $themes->random();
+        // Find existing coaches with role 'coach'
+        $existingCoaches = User::where('role', 'coach')->get();
 
-                $course = Course::factory()->create([
-                    'theme_id' => $theme->id,
-                    'coach_id' => $coach->id,
-                    'title' => "Advanced {$theme->name} Course {$courseIndex}",
-                    'description' => "An in-depth exploration of {$theme->name} techniques and concepts, designed for intermediate to advanced students.",
-                    'is_approved' => $courseIndex <= 3, // First 3 courses approved, last 2 pending
-                ]);
+        if ($existingCoaches->isEmpty()) {
+            $this->command->error('No coaches found in the database. Please create coaches first.');
 
-                $this->command->info("  Creating course: {$course->title}");
+            return;
+        }
 
-                // Each course gets 4 modules
-                for ($moduleIndex = 1; $moduleIndex <= 4; $moduleIndex++) {
-                    $difficulties = ['easy', 'medium', 'hard'];
-                    $difficulty = $difficulties[($moduleIndex - 1) % 3]; // Cycle through difficulties
+        $this->command->info("Found {$existingCoaches->count()} existing coaches");
+        $this->command->info("Found {$courses->count()} existing courses");
+        $this->command->info("Found {$modules->count()} existing modules");
 
-                    $module = Module::factory()->create([
-                        'title' => "Module {$moduleIndex}: ".fake()->words(3, true),
-                        'description' => fake()->paragraphs(2, true),
-                        'difficulty' => $difficulty,
-                        'video_url' => $moduleIndex <= 2 ? 'https://vimeo.com/'.fake()->numberBetween(100000000, 999999999) : null,
-                    ]);
+        // Map each coach to all courses and modules
+        foreach ($existingCoaches as $coach) {
+            $this->command->info("Mapping coach: {$coach->name} to all courses and modules");
 
-                    // Attach module to course with order
-                    $course->modules()->attach($module->id, ['order' => $moduleIndex]);
+            // Update all courses to be associated with this coach
+            foreach ($courses as $course) {
+                $course->update(['coach_id' => $coach->id]);
+            }
 
-                    $this->command->info("    Creating module: {$module->title}");
-
-                    // Each module gets 2-3 attachments
-                    $attachmentCount = fake()->numberBetween(2, 3);
-
-                    for ($attachmentIndex = 1; $attachmentIndex <= $attachmentCount; $attachmentIndex++) {
-                        $attachmentTypes = ['pdf', 'document', 'image'];
-                        $attachmentType = fake()->randomElement($attachmentTypes);
-
-                        Attachment::factory()->$attachmentType()->create([
-                            'module_id' => $module->id,
-                        ]);
-                    }
-
-                    $this->command->info("      Created {$attachmentCount} attachments");
-                }
+            // Update all modules to be associated with this coach
+            foreach ($modules as $module) {
+                $module->update(['coach_id' => $coach->id]);
             }
         }
 
-        // Create some additional students
-        User::factory()->count(10)->create([
-            'role' => 'student',
-            'email_verified_at' => now(),
-        ]);
+        // Create some additional students if needed
+        $existingStudents = User::where('role', 'student')->count();
+        if ($existingStudents < 10) {
+            $studentsToCreate = 10 - $existingStudents;
+            User::factory()->count($studentsToCreate)->create([
+                'role' => 'student',
+                'email_verified_at' => now(),
+            ]);
+            $this->command->info("Created {$studentsToCreate} additional students");
+        }
 
-        $this->command->info('Coaches, courses, modules, and attachments created successfully!');
+        $this->command->info('Coach mapping completed successfully!');
         $this->command->info('Summary:');
-        $this->command->info('- 3 Coaches created');
-        $this->command->info('- 15 Additional courses created (5 per coach)');
-        $this->command->info('- 60 Modules created (4 per course)');
-        $this->command->info('- ~150 Attachments created (2-3 per module)');
-        $this->command->info('- 10 Students created');
+        $this->command->info("- {$existingCoaches->count()} coaches mapped to all courses and modules");
+        $this->command->info("- {$courses->count()} courses now associated with coaches");
+        $this->command->info("- {$modules->count()} modules now associated with coaches");
     }
 }

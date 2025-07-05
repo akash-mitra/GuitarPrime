@@ -25,10 +25,10 @@ test('student can access themes index for browsing', function () {
     $response->assertStatus(200);
 });
 
-test('coach can create theme', function () {
-    $coach = User::factory()->create(['role' => 'coach']);
+test('admin can create theme', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
 
-    $response = $this->actingAs($coach)->post(route('themes.store'), [
+    $response = $this->actingAs($admin)->post(route('themes.store'), [
         'name' => 'Guitar Basics',
         'description' => 'Learn the fundamentals of guitar playing',
     ]);
@@ -38,6 +38,18 @@ test('coach can create theme', function () {
         'name' => 'Guitar Basics',
         'description' => 'Learn the fundamentals of guitar playing',
     ]);
+});
+
+test('coach cannot create theme', function () {
+    $coach = User::factory()->create(['role' => 'coach']);
+
+    $response = $this->actingAs($coach)->post(route('themes.store'), [
+        'name' => 'Guitar Basics',
+        'description' => 'Learn the fundamentals',
+    ]);
+
+    $response->assertStatus(403);
+    $this->assertDatabaseMissing('themes', ['name' => 'Guitar Basics']);
 });
 
 test('student cannot create theme', function () {
@@ -52,11 +64,11 @@ test('student cannot create theme', function () {
     $this->assertDatabaseMissing('themes', ['name' => 'Guitar Basics']);
 });
 
-test('coach can edit theme', function () {
-    $coach = User::factory()->create(['role' => 'coach']);
+test('admin can edit theme', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
     $theme = Theme::factory()->create(['name' => 'Original Name']);
 
-    $response = $this->actingAs($coach)->put(route('themes.update', $theme), [
+    $response = $this->actingAs($admin)->put(route('themes.update', $theme), [
         'name' => 'Updated Name',
         'description' => 'Updated description',
     ]);
@@ -66,6 +78,22 @@ test('coach can edit theme', function () {
         'id' => $theme->id,
         'name' => 'Updated Name',
         'description' => 'Updated description',
+    ]);
+});
+
+test('coach cannot edit theme', function () {
+    $coach = User::factory()->create(['role' => 'coach']);
+    $theme = Theme::factory()->create(['name' => 'Original Name']);
+
+    $response = $this->actingAs($coach)->put(route('themes.update', $theme), [
+        'name' => 'Updated Name',
+        'description' => 'Updated description',
+    ]);
+
+    $response->assertStatus(403);
+    $this->assertDatabaseHas('themes', [
+        'id' => $theme->id,
+        'name' => 'Original Name',
     ]);
 });
 
@@ -90,9 +118,9 @@ test('coach cannot delete theme', function () {
 });
 
 test('theme validation works correctly', function () {
-    $coach = User::factory()->create(['role' => 'coach']);
+    $admin = User::factory()->create(['role' => 'admin']);
 
-    $response = $this->actingAs($coach)->post(route('themes.store'), [
+    $response = $this->actingAs($admin)->post(route('themes.store'), [
         'name' => '', // Required field empty
         'description' => str_repeat('a', 1001), // Too long
     ]);
@@ -101,10 +129,10 @@ test('theme validation works correctly', function () {
 });
 
 test('theme name must be unique', function () {
-    $coach = User::factory()->create(['role' => 'coach']);
+    $admin = User::factory()->create(['role' => 'admin']);
     Theme::factory()->create(['name' => 'Existing Theme']);
 
-    $response = $this->actingAs($coach)->post(route('themes.store'), [
+    $response = $this->actingAs($admin)->post(route('themes.store'), [
         'name' => 'Existing Theme',
         'description' => 'Some description',
     ]);

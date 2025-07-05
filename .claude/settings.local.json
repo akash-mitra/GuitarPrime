@@ -21,7 +21,9 @@
       "Bash(grep:*)",
       "Bash(./vendor/bin/pint:*)",
       "Bash(npm run dev:*)",
-      "Bash(npm run format:*)"
+      "Bash(npm run format:*)",
+      "Bash(pest tests:*)",
+      "Bash(jq:*)"
     ],
     "deny": []
   }

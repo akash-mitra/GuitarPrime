@@ -58,7 +58,10 @@ test('student cannot create module', function () {
 
 test('coach can edit module', function () {
     $coach = User::factory()->create(['role' => 'coach']);
-    $module = Module::factory()->create(['title' => 'Original Title']);
+    $module = Module::factory()->create([
+        'title' => 'Original Title',
+        'coach_id' => $coach->id,
+    ]);
 
     $response = $this->actingAs($coach)->put(route('modules.update', $module), [
         'title' => 'Updated Title',
@@ -84,9 +87,20 @@ test('admin can delete module', function () {
     $this->assertDatabaseMissing('modules', ['id' => $module->id]);
 });
 
-test('coach cannot delete module', function () {
+test('coach can delete their own module', function () {
     $coach = User::factory()->create(['role' => 'coach']);
-    $module = Module::factory()->create();
+    $module = Module::factory()->create(['coach_id' => $coach->id]);
+
+    $response = $this->actingAs($coach)->delete(route('modules.destroy', $module));
+
+    $response->assertRedirect(route('modules.index'));
+    $this->assertDatabaseMissing('modules', ['id' => $module->id]);
+});
+
+test('coach cannot delete other coaches module', function () {
+    $coach = User::factory()->create(['role' => 'coach']);
+    $otherCoach = User::factory()->create(['role' => 'coach']);
+    $module = Module::factory()->create(['coach_id' => $otherCoach->id]);
 
     $response = $this->actingAs($coach)->delete(route('modules.destroy', $module));
 
@@ -139,9 +153,9 @@ test('coach can reorder modules in course', function () {
         'coach_id' => $coach->id,
     ]);
 
-    $module1 = Module::factory()->create();
-    $module2 = Module::factory()->create();
-    $module3 = Module::factory()->create();
+    $module1 = Module::factory()->create(['coach_id' => $coach->id]);
+    $module2 = Module::factory()->create(['coach_id' => $coach->id]);
+    $module3 = Module::factory()->create(['coach_id' => $coach->id]);
 
     // Attach modules to course with initial order
     $course->modules()->attach($module1->id, ['order' => 1]);
@@ -198,6 +212,11 @@ test('student cannot reorder modules', function () {
 
 test('reorder validation works correctly', function () {
     $coach = User::factory()->create(['role' => 'coach']);
+    $theme = Theme::factory()->create();
+    $course = Course::factory()->create([
+        'theme_id' => $theme->id,
+        'coach_id' => $coach->id,
+    ]);
 
     $response = $this->actingAs($coach)->post(route('modules.reorder'), [
         'course_id' => '', // Required

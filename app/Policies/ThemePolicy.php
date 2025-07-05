@@ -19,12 +19,12 @@ class ThemePolicy
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'coach']);
+        return $user->hasRole('admin');
     }
 
     public function update(User $user, Theme $theme): bool
     {
-        return $user->hasAnyRole(['admin', 'coach']);
+        return $user->hasRole('admin');
     }
 
     public function delete(User $user, Theme $theme): bool

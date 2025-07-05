@@ -10,7 +10,12 @@ class Module extends Model
 {
     use HasFactory, HasUlids;
 
-    protected $fillable = ['title', 'description', 'difficulty', 'video_url', 'cover_image', 'is_free'];
+    protected $fillable = ['coach_id', 'title', 'description', 'difficulty', 'video_url', 'cover_image', 'is_free'];
+
+    public function coach()
+    {
+        return $this->belongsTo(User::class, 'coach_id');
+    }
 
     public function courses()
     {

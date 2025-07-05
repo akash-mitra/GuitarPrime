@@ -69,14 +69,28 @@
             />
 
             <div v-if="course.modules && course.modules.length > 0" class="mt-8">
-                <h3 class="mb-4 text-lg font-semibold">Course Modules</h3>
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">Course Modules</h3>
+                    
+                    <!-- Reorder Toggle Button (only visible to users who can edit) -->
+                    <button
+                        v-if="canEdit"
+                        @click="showReorderMode = !showReorderMode"
+                        class="flex items-center space-x-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l4 4m12-4v4m0-4h-4m4 0l-4 4M4 16v4m0 0h4m-4 0l4-4m12 4l-4-4m4 4v-4m0 4h-4" />
+                        </svg>
+                        <span>{{ showReorderMode ? 'Exit Reorder Mode' : 'Reorder Modules' }}</span>
+                    </button>
+                </div>
 
-                <!-- Module Reorder Component for users who can edit -->
-                <div v-if="canEdit">
+                <!-- Module Reorder Component (shown when reorder mode is active) -->
+                <div v-if="canEdit && showReorderMode">
                     <ModuleReorder :course-id="course.id" :modules="course.modules" />
                 </div>
 
-                <!-- Read-only module display for users who can't edit -->
+                <!-- Normal module display -->
                 <div v-else class="space-y-3">
                     <ModuleCard
                         v-for="module in course.modules"
@@ -115,7 +129,7 @@ import PurchaseButton from '@/components/PurchaseButton.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 interface User {
     id: number;
@@ -176,4 +190,6 @@ const { auth } = usePage().props;
 const canEdit = computed(() => {
     return auth.user.role === 'admin' || (auth.user.role === 'coach' && props.course.coach_id === auth.user.id);
 });
+
+const showReorderMode = ref(false);
 </script>

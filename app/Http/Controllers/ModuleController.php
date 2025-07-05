@@ -20,12 +20,21 @@ class ModuleController extends Controller
         $search = $request->get('search');
 
         $modules = Module::withCount('attachments')
+            ->with('coach')
             ->when($search, function ($query, $search) {
                 return $query->where('title', 'like', "%{$search}%");
             })
             ->latest()
             ->paginate(10)
             ->appends($request->query());
+
+        // Add authorization information to each module
+        $modules->getCollection()->transform(function ($module) {
+            $module->can_edit = auth()->user()->can('update', $module);
+            $module->can_delete = auth()->user()->can('delete', $module);
+
+            return $module;
+        });
 
         return Inertia::render('modules/Index', [
             'modules' => $modules,
@@ -53,7 +62,9 @@ class ModuleController extends Controller
             'video_url' => 'nullable|url|regex:/^https:\/\/(www\.)?vimeo\.com\/\d+(\?.*)?$/',
         ]);
 
-        Module::create($validated);
+        Module::create(array_merge($validated, [
+            'coach_id' => auth()->id(),
+        ]));
 
         return redirect()->route('modules.index')
             ->with('success', 'Module created successfully.');
@@ -135,14 +146,15 @@ class ModuleController extends Controller
 
     public function reorder(Request $request)
     {
-        $this->authorize('update', new Module);
-
         $validated = $request->validate([
             'course_id' => 'required|exists:courses,id',
             'modules' => 'required|array',
             'modules.*.id' => 'required|exists:modules,id',
             'modules.*.order' => 'required|integer|min:1',
         ]);
+
+        $course = Course::findOrFail($validated['course_id']);
+        $this->authorize('update', $course);
 
         DB::transaction(function () use ($validated) {
             foreach ($validated['modules'] as $moduleData) {

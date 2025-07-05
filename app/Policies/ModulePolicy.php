@@ -24,12 +24,12 @@ class ModulePolicy
 
     public function update(User $user, Module $module): bool
     {
-        return $user->hasAnyRole(['admin', 'coach']);
+        return $user->hasRole('admin') || ($user->hasRole('coach') && $module->coach_id === $user->id);
     }
 
     public function delete(User $user, Module $module): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasRole('admin') || ($user->hasRole('coach') && $module->coach_id === $user->id);
     }
 
     /**

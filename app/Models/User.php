@@ -114,8 +114,14 @@ class User extends Authenticatable
                 return $purchasable->coach_id === $this->id || $this->hasPurchased($purchasable);
             }
 
-            // For modules, check if the coach owns any course that contains this module
+            // For modules, check if the coach owns the module directly or any course that contains this module
             if ($purchasable instanceof \App\Models\Module) {
+                // Coach owns the module directly
+                if ($purchasable->coach_id === $this->id) {
+                    return true;
+                }
+
+                // Coach owns a course that contains this module
                 $ownsModuleInCourse = $purchasable->courses()
                     ->where('coach_id', $this->id)
                     ->exists();

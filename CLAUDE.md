@@ -76,5 +76,4 @@ The application centers around a guitar education platform:
 - Social authentication via Laravel Socialite
 
 ## Current State
-
 The project has already implemented the domain models, factories, authentication, and basic CRUD operations along with UI. It is now ready for further development of payments & subscriptions related features, and additional UI components.

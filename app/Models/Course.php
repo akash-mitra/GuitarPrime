@@ -65,7 +65,7 @@ class Course extends Model
 
     public function isFree(): bool
     {
-        return $this->is_free || is_null($this->price) || $this->price <= 0;
+        return is_null($this->price) || $this->price <= 0;
     }
 
     public function getFormattedPriceAttribute(): string
