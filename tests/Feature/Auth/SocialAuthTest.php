@@ -25,17 +25,14 @@ it('signs in with Google', function () {
     $socialiteUser
         ->shouldReceive('getId')->andReturn($googleId = '12345654321345')
         ->shouldReceive('getName')->andReturn($user->name)
-        ->shouldReceive('getEmail')->andReturn($user->email);
-    //        ->shouldReceive('getAvatar')->andReturn($avatarUrl = 'https://en.gravatar.com/userimage');
+        ->shouldReceive('getEmail')->andReturn($user->email)
+        ->shouldReceive('getAvatar')->andReturn($avatarUrl = 'https://en.gravatar.com/userimage');
 
     Socialite::shouldReceive('driver->user')->andReturn($socialiteUser);
 
     $this->get(route('oauth.callback', 'google'))->assertRedirect(route('dashboard'));
     expect(auth()->check())->toBeTrue();
 
-    //    expect($user->refresh())
-    //        ->avatar_path->toBe($avatarUrl)
-    //        ->oauth_provider->toBe('google')
-    //        ->oauth_id->toBe($googleId)
-    //        ->oauth_data->not->toBeNull();
+    expect($user->refresh())
+        ->avatar->toBe($avatarUrl);
 });

@@ -18,9 +18,12 @@ class SocialiteLoginController extends Controller
     {
         $user = Socialite::driver($provider)->user();
 
-        $authUser = User::firstOrCreate(
+        $authUser = User::updateOrCreate(
             ['email' => $user->getEmail()],
-            ['name' => $user->getName()]
+            [
+                'name' => $user->getName(),
+                'avatar' => $user->getAvatar(),
+            ]
         );
 
         Auth::login($authUser);

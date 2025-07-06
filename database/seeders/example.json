@@ -3,6 +3,7 @@
     {
       "name": "Devotional Guitar",
       "description": "Blend spirituality with musicianship by arranging and performing bhajans, aartis, and Sufi kalams on guitar. Emphasis on expressive phrasing, open tunings, and creating meditative textures.",
+      "cover_image": "https://images.unsplash.com/photo-1633777304998-1f1d66a89c22?w=900&auto=format&fit=crop&q=60",
       "courses": [
         {
           "name": "Bhajans & Aartis",
@@ -152,6 +153,7 @@
     {
       "name": "Fingerstyle Advanced",
       "description": "Push your fingerstyle playing into professional territory with percussive slaps, tapped harmonics, alternate tunings, and complex song arrangements that demand rhythmic precision and creative flair.",
+      "cover_image": "https://images.unsplash.com/photo-1636304438024-e737e07a687e?q=80",
       "courses": [
         {
           "name": "Bollywood Fingerstyle Covers",
@@ -214,6 +216,7 @@
     {
       "name": "Fingerstyle Essentials",
       "description": "Master the foundational techniques of modern fingerstyle guitar—thumb‑index alternation, basic percussive hits, and melodic independence—while learning well‑loved Bollywood melodies.",
+      "cover_image": "https://images.unsplash.com/photo-1699797401383-c605f83114aa?q=80",
       "courses": [
         {
           "name": "Bollywood Fingerstyle Covers",
@@ -1081,6 +1084,7 @@
     {
       "name": "Flamenco & Latin",
       "description": "Dive into the fiery world of flamenco rasgueado, rumba strums, and Latin jazz chord progressions, merging traditional Spanish techniques with popular Latin American repertoire.",
+      "cover_image": "https://images.unsplash.com/photo-1742736307053-f9e35da86604?w=900&auto=format&fit=crop&q=60",
       "courses": [
         {
           "name": "Introduction to Flamenco Guitar",
@@ -1213,6 +1217,7 @@
     {
       "name": "Indian Fusion Guitar",
       "description": "Fuse Hindustani/Carnatic motifs with Western harmony.  Explore ragas on the fretboard, incorporate tabla‑style percussion, and craft genre‑bending compositions.",
+      "cover_image": "https://images.unsplash.com/photo-1709406402364-c04d09eefacf?q=80&w=800&auto=format&fit=crop",
       "courses": [
         {
           "name": "Bollywood & Folk Fusion",

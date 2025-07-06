@@ -100,6 +100,9 @@ interface Course {
     description: string;
     is_approved: boolean;
     coach_id: number;
+    price?: number | null;
+    is_free?: boolean;
+    cover_image?: string;
     theme: Theme;
     coach: User;
 }

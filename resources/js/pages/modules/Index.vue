@@ -50,7 +50,9 @@
 
                     <div class="flex space-x-2">
                         <Link :href="route('modules.show', module.id)" class="text-sm text-blue-600 hover:text-blue-800"> View </Link>
-                        <Link v-if="module.can_edit" :href="route('modules.edit', module.id)" class="text-sm text-green-600 hover:text-green-800"> Edit </Link>
+                        <Link v-if="module.can_edit" :href="route('modules.edit', module.id)" class="text-sm text-green-600 hover:text-green-800">
+                            Edit
+                        </Link>
                         <button v-if="module.can_delete" @click="deleteModule(module)" class="text-sm text-red-600 hover:text-red-800">Delete</button>
                     </div>
                 </div>
@@ -155,7 +157,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Modules', href: '/modules' },
 ];
-
 
 const deleteModule = (module: Module) => {
     if (confirm(`Are you sure you want to delete "${module.title}"?`)) {

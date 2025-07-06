@@ -2,15 +2,18 @@
     <Head :title="theme.name" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 lg:p-6">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-3xl font-bold">{{ theme.name }}</h1>
                     <p v-if="theme.description" class="mt-2 text-gray-600">{{ theme.description }}</p>
                 </div>
-                <div class="flex space-x-2">
-                    <Link :href="route('themes.index')" class="rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700">
-                        Back to Themes
+                <div class="ml-6 flex space-x-2">
+                    <Link
+                        :href="route('themes.index')"
+                        class="rounded bg-gray-500 px-4 py-2 font-bold whitespace-nowrap text-white hover:bg-gray-700"
+                    >
+                        &laquo; Themes
                     </Link>
                     <Link
                         v-if="$page.props.auth.user.role !== 'student'"
@@ -22,15 +25,15 @@
                 </div>
             </div>
 
-            <div class="mb-6 rounded-lg bg-gray-50 p-4">
-                <h2 class="mb-4 text-xl font-semibold">Courses in this Theme</h2>
+            <div class="mb-6 rounded-lg py-4">
+                <h2 class="mb-4 text-xl font-semibold">Courses in this theme</h2>
 
-                <div class="mb-4">
+                <div class="mb-6">
                     <input
                         v-model="searchQuery"
                         type="text"
                         placeholder="Search courses in this theme..."
-                        class="w-full max-w-md rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                        class="w-full max-w-md rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-950 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
 
@@ -47,7 +50,7 @@
                     </Link>
                 </div>
 
-                <div v-else class="space-y-4">
+                <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     <CourseCard v-for="course in courses.data" :key="course.id" :course="transformCourse(course)" @delete="deleteCourse" />
                 </div>
 
@@ -120,6 +123,9 @@ const props = defineProps<{
             description: string;
             is_approved: boolean;
             coach_id: number;
+            price?: number | null;
+            is_free?: boolean;
+            cover_image?: string;
             coach: {
                 id: number;
                 name: string;

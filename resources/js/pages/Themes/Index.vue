@@ -2,9 +2,15 @@
     <Head title="Themes" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-semibold">Themes</h1>
+        <div class="mx-auto flex h-full max-w-7xl flex-1 flex-col gap-4 rounded-xl p-4 lg:p-6">
+            <div class="flex items-center justify-between border-b pb-4">
+                <div>
+                    <h1 class="text-2xl font-semibold">Themes</h1>
+                    <p class="py-2">
+                        Our Guitar course catalog is arranged around specific styles or themes to help you focus on niche learning goals.
+                    </p>
+                </div>
+
                 <Link
                     v-if="$page.props.auth.user.role === 'admin'"
                     :href="route('themes.create')"
@@ -14,7 +20,7 @@
                 </Link>
             </div>
 
-            <div class="mb-4">
+            <div class="my-2">
                 <input
                     v-model="searchQuery"
                     type="text"
