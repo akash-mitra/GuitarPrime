@@ -2,7 +2,7 @@
     <Head :title="theme.name" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 lg:p-6">
+        <div class="mx-auto flex h-full max-w-7xl flex-1 flex-col gap-4 rounded-xl p-4 lg:p-6">
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-3xl font-bold">{{ theme.name }}</h1>
@@ -26,9 +26,9 @@
             </div>
 
             <div class="mb-6 rounded-lg py-4">
-                <h2 class="mb-4 text-xl font-semibold">Courses in this theme</h2>
+                <h2 class="mb-4 text-2xl font-semibold border-b pb-4">Courses</h2>
 
-                <div class="mb-6">
+                <div class="my-6">
                     <input
                         v-model="searchQuery"
                         type="text"
