@@ -3,7 +3,7 @@
         :class="[
             'relative rounded-2xl border p-6 transition-all duration-300',
             {
-                'backdrop-blur-sm bg-white/10 dark:bg-black/20 border-white/20 dark:border-white/10 shadow-xl hover:shadow-2xl hover:bg-white/20 dark:hover:bg-black/30': hasAccess,
+                'backdrop-blur-sm bg-white/10 dark:bg-black/20 border-white/20 dark:border-white/10 shadow hover:shadow-2xl hover:bg-white/20 dark:hover:bg-black/30': hasAccess,
                 'backdrop-blur-sm bg-white/5 dark:bg-black/10 border-white/10 dark:border-white/5 shadow-lg opacity-75': !hasAccess,
                 'cursor-move transition-all hover:scale-[1.02]': draggable,
             },
@@ -75,11 +75,11 @@
                     </span>
 
                     <!-- Module access indicator -->
-                    <span v-if="!hasAccess && showAccessIndicator && !module.is_free" class="text-xs text-gray-500 dark:text-gray-400 bg-gray-200/20 dark:bg-gray-700/20 px-2 py-1 rounded-full backdrop-blur-sm"> 
+                    <span v-if="!hasAccess && showAccessIndicator && !module.is_free" class="text-xs text-gray-500 dark:text-gray-400 bg-gray-200/20 dark:bg-gray-700/20 px-2 py-1 rounded-full backdrop-blur-sm">
                         🔒 Locked Content
                     </span>
                     <!-- Free module indicator -->
-                    <span v-if="module.is_free" class="text-xs text-green-600 dark:text-green-400 bg-green-200/20 dark:bg-green-700/20 px-2 py-1 rounded-full backdrop-blur-sm"> 
+                    <span v-if="module.is_free" class="text-xs text-green-600 dark:text-green-400 bg-green-200/20 dark:bg-green-700/20 px-2 py-1 rounded-full backdrop-blur-sm">
                         ✨ Free Demo
                     </span>
                 </div>

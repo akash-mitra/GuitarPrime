@@ -1,15 +1,16 @@
 <template>
-    <div v-if="attachments && attachments.length > 0" class="mt-8">
-        <h3 class="mb-4 text-lg font-semibold">Attachments</h3>
-        <div class="space-y-2">
+    <div>
+        <h3 class="mb-2 text-lg font-medium">Attachments</h3>
+
+        <div v-if="attachments && attachments.length > 0" class="space-y-2">
             <div
                 v-for="attachment in attachments"
                 :key="attachment.id"
-                class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3"
+                class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900/50"
             >
                 <div class="flex-1">
-                    <h4 class="text-sm font-medium">{{ attachment.filename }}</h4>
-                    <p class="text-xs text-gray-500">{{ formatFileSize(attachment.size) }} • {{ attachment.mime_type }}</p>
+                    <h4 class="text-sm font-medium dark:text-gray-100">{{ attachment.filename }}</h4>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatFileSize(attachment.size) }} • {{ attachment.mime_type }}</p>
                 </div>
 
                 <!-- Show download button if user has access -->
@@ -50,21 +51,20 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div v-else class="mt-8 py-8 text-center">
-        <div class="mb-4 text-gray-400">
-            <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                />
-            </svg>
+        <div v-else class="py-8 text-center">
+            <div class="mb-4 text-gray-400">
+                <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                    />
+                </svg>
+            </div>
+            <p class="text-gray-500">This module doesn't have any attachments yet.</p>
         </div>
-        <h3 class="mb-2 text-lg font-medium text-gray-900">No attachments</h3>
-        <p class="text-gray-500">This {{ purchasableType }} doesn't have any attachments yet.</p>
     </div>
 </template>
 

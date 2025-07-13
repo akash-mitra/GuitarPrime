@@ -12,14 +12,14 @@
                 </svg>
             </div>
 
-            <h3 class="mb-2 text-xl font-semibold text-gray-900">Premium Content</h3>
+            <h3 class="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-300">Premium Content</h3>
 
-            <p class="mx-auto mb-6 max-w-md text-gray-600">
+            <p class="mx-auto mb-6 max-w-md text-gray-500">
                 {{ description }}
             </p>
 
             <div class="space-y-4">
-                <div v-if="pricing.formatted_price" class="text-3xl font-bold text-gray-900">
+                <div v-if="pricing.formatted_price" class="text-3xl font-bold text-gray-900 dark:text-gray-400">
                     {{ pricing.formatted_price }}
                 </div>
 
@@ -30,11 +30,11 @@
                             :purchasable-id="purchasableId"
                             :price="pricing.price"
                             :is-free="pricing.is_free"
-                            class="w-full"
+                            :class="primaryButtonClass"
                         />
                     </slot>
 
-                    <p class="text-xs text-gray-500">One-time purchase • Lifetime access</p>
+                    <p class="mt-1 text-xs text-gray-500">One-time purchase • Lifetime access</p>
                 </div>
             </div>
         </CardContent>
@@ -54,6 +54,7 @@ interface Props {
         is_free: boolean;
         formatted_price: string;
     };
+    primaryButtonClass?: string;
 }
 
 defineProps<Props>();

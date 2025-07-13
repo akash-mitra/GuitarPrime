@@ -95,6 +95,38 @@ class ModuleController extends Controller
         $module->load(['attachments']);
         $user = auth()->user();
 
+        // Get course modules ordered by their pivot order
+        $courseModules = $course->modules()
+            ->orderBy('course_module_map.order')
+            ->select('modules.id', 'modules.title', 'course_module_map.order')
+            ->get();
+
+        // Find current module position and get previous/next modules
+        $currentModuleIndex = $courseModules->search(function ($item) use ($module) {
+            return $item->id === $module->id;
+        });
+
+        $previousModule = null;
+        $nextModule = null;
+
+        if ($currentModuleIndex !== false) {
+            if ($currentModuleIndex > 0) {
+                $prev = $courseModules[$currentModuleIndex - 1];
+                $previousModule = [
+                    'id' => $prev->id,
+                    'title' => $prev->title,
+                ];
+            }
+
+            if ($currentModuleIndex < $courseModules->count() - 1) {
+                $next = $courseModules[$currentModuleIndex + 1];
+                $nextModule = [
+                    'id' => $next->id,
+                    'title' => $next->title,
+                ];
+            }
+        }
+
         return Inertia::render('Courses/modules/Show', [
             'course' => $course->load(['theme', 'coach']),
             'module' => $module,
@@ -105,6 +137,8 @@ class ModuleController extends Controller
                 'is_free' => $course->is_free,
                 'formatted_price' => $course->formatted_price,
             ],
+            'previousModule' => $previousModule,
+            'nextModule' => $nextModule,
         ]);
     }
 
