@@ -1,5 +1,5 @@
 <template>
-    <Button @click="handlePurchase" :disabled="loading" :variant="isFree ? 'secondary' : 'default'" :class="buttonClass">
+    <Button @click="handlePurchase" :disabled="loading" :variant="isFree ? 'secondary' : 'default'" :class="buttonClass" class="cursor-pointer">
         <template v-if="loading">
             <svg class="mr-2 -ml-1 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -59,7 +59,7 @@ const buttonText = computed(() => {
     const priceInRupees = (numericPrice || 0) / 100;
     const formattedPrice = priceInRupees.toFixed(2);
 
-    return `Purchase for ₹${formattedPrice}`;
+    return `Buy ₹${formattedPrice}`;
 });
 
 const buttonClass = computed(() => props.class || '');

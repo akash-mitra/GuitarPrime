@@ -37,6 +37,7 @@ class AssignUserRolesSeeder extends Seeder
                 'password' => bcrypt('password'),
                 'role' => 'admin',
                 'email_verified_at' => now(),
+                'avatar' => fake()->imageUrl(200, 200, 'people'),
             ]);
 
             User::create([
@@ -45,6 +46,7 @@ class AssignUserRolesSeeder extends Seeder
                 'password' => bcrypt('password'),
                 'role' => 'coach',
                 'email_verified_at' => now(),
+                'avatar' => fake()->imageUrl(200, 200, 'people'),
             ]);
 
             User::create([
@@ -53,6 +55,7 @@ class AssignUserRolesSeeder extends Seeder
                 'password' => bcrypt('password'),
                 'role' => 'student',
                 'email_verified_at' => now(),
+                'avatar' => fake()->imageUrl(200, 200, 'people'),
             ]);
 
             $this->command->info('Created sample users for all roles');

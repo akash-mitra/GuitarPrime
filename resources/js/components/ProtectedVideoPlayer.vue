@@ -14,7 +14,7 @@
                     title="YouTube video player"
                 ></iframe>
             </div>
-            
+
             <!-- Vimeo or other video links -->
             <div v-else class="flex h-full items-center justify-center">
                 <a :href="videoUrl" target="_blank" class="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
@@ -79,8 +79,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import PurchaseButton from '@/components/PurchaseButton.vue';
+import { computed } from 'vue';
 
 interface Props {
     videoUrl?: string;
@@ -99,19 +99,16 @@ const props = defineProps<Props>();
 // Helper function to extract YouTube video ID from URL
 const extractYouTubeId = (url: string): string | null => {
     if (!url) return null;
-    
-    const patterns = [
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-        /(?:youtube\.com\/watch\?.*v=)([^&\n?#]+)/
-    ];
-    
+
+    const patterns = [/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/, /(?:youtube\.com\/watch\?.*v=)([^&\n?#]+)/];
+
     for (const pattern of patterns) {
         const match = url.match(pattern);
         if (match && match[1]) {
             return match[1];
         }
     }
-    
+
     return null;
 };
 
@@ -130,10 +127,10 @@ const isVimeoUrl = computed(() => {
 // Generate YouTube embed URL
 const youTubeEmbedUrl = computed(() => {
     if (!props.videoUrl || !isYouTubeUrl.value) return '';
-    
+
     const videoId = extractYouTubeId(props.videoUrl);
     if (!videoId) return '';
-    
+
     return `https://www.youtube.com/embed/${videoId}`;
 });
 </script>
