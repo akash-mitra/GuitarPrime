@@ -39,10 +39,10 @@
             </div>
 
         </div>
-        <div class="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full mb-6 z-10"></div>
+        <div class="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full z-10 mb-6"></div>
 
         <!-- Main Content Section -->
-        <div class="w-full xl:flex px-12">
+        <div class="w-full xl:flex px-12 z-10">
             <!-- Left Side: Course Details -->
             <div class="w-full xl:w-1/2 z-10 px-8 lg:px-12 -mt-16 xl:-mt-32 max-w-3xl xl:max-w-xl">
                 <div>
