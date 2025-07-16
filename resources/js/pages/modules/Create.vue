@@ -2,17 +2,17 @@
     <Head title="Create Module" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-8 max-w-6xl">
             <h1 class="text-2xl font-semibold">Create Module</h1>
 
             <form @submit.prevent="submit">
                 <div class="mb-6">
-                    <label for="title" class="mb-2 block text-sm font-medium text-gray-700"> Module Title * </label>
+                    <label for="title" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-500"> Module Title * </label>
                     <input
                         id="title"
                         v-model="form.title"
                         type="text"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-950 dark:border-gray-700"
                         :class="{ 'border-red-500': form.errors.title }"
                         required
                     />
@@ -22,12 +22,12 @@
                 </div>
 
                 <div class="mb-6">
-                    <label for="description" class="mb-2 block text-sm font-medium text-gray-700"> Module Description * </label>
+                    <label for="description" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-500"> Module Description * </label>
                     <textarea
                         id="description"
                         v-model="form.description"
                         rows="4"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-950 dark:border-gray-700"
                         :class="{ 'border-red-500': form.errors.description }"
                         required
                     ></textarea>
@@ -37,11 +37,11 @@
                 </div>
 
                 <div class="mb-6">
-                    <label for="difficulty" class="mb-2 block text-sm font-medium text-gray-700"> Difficulty Level * </label>
+                    <label for="difficulty" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-500"> Difficulty Level * </label>
                     <select
                         id="difficulty"
                         v-model="form.difficulty"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-950 dark:border-gray-700"
                         :class="{ 'border-red-500': form.errors.difficulty }"
                         required
                     >
@@ -56,13 +56,13 @@
                 </div>
 
                 <div class="mb-6">
-                    <label for="video_url" class="mb-2 block text-sm font-medium text-gray-700"> Vimeo Video URL </label>
+                    <label for="video_url" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-500"> Vimeo Video URL </label>
                     <input
                         id="video_url"
                         v-model="form.video_url"
                         type="url"
                         placeholder="https://vimeo.com/123456789"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-950 dark:border-gray-700"
                         :class="{ 'border-red-500': form.errors.video_url }"
                     />
                     <div v-if="form.errors.video_url" class="mt-1 text-sm text-red-600">
@@ -155,11 +155,5 @@ const submit = async () => {
         console.error('Error during module creation:', error);
         alert('Failed to create module. Please try again.');
     }
-};
-
-const extractModuleIdFromUrl = (url: string): string | null => {
-    // This is a fallback - the backend should provide the module ID
-    const match = url.match(/\/modules\/([^\/]+)/);
-    return match ? match[1] : null;
 };
 </script>
