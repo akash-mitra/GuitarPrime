@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\PurchaseController;
@@ -72,6 +73,18 @@ Route::middleware(['auth', 'role:admin,coach'])->group(function () {
     Route::put('modules/{module}', [ModuleController::class, 'update'])->name('modules.update');
     Route::patch('modules/{module}', [ModuleController::class, 'update']);
     Route::delete('modules/{module}', [ModuleController::class, 'destroy'])->name('modules.destroy');
+});
+
+// Attachment management - Admin and coach only for upload/edit/delete
+Route::middleware(['auth', 'role:admin,coach'])->group(function () {
+    Route::post('attachments', [AttachmentController::class, 'store'])->name('attachments.store');
+    Route::put('attachments/{attachment}', [AttachmentController::class, 'update'])->name('attachments.update');
+    Route::delete('attachments/{attachment}', [AttachmentController::class, 'destroy'])->name('attachments.destroy');
+});
+
+// Attachment download - All authenticated users (with access control in controller)
+Route::middleware('auth')->group(function () {
+    Route::get('attachments/{attachment}/download', [AttachmentController::class, 'download'])->name('attachments.download');
 });
 
 // Module browsing - Admin and coach only for direct access

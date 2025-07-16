@@ -71,6 +71,10 @@
                     <p class="mt-1 text-sm text-gray-500">Optional. Must be a valid Vimeo URL (e.g., https://vimeo.com/123456789)</p>
                 </div>
 
+                <div class="mb-6">
+                    <AttachmentUpload ref="attachmentUpload" />
+                </div>
+
                 <div class="flex items-center justify-between">
                     <Link :href="route('modules.index')" class="rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700"> Cancel </Link>
                     <button
@@ -89,14 +93,18 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import AttachmentUpload from '@/components/AttachmentUpload.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Modules', href: '/modules' },
     { title: 'Create', href: '/modules/create' },
 ];
+
+const attachmentUpload = ref<InstanceType<typeof AttachmentUpload>>();
 
 const form = useForm({
     title: '',
@@ -105,7 +113,53 @@ const form = useForm({
     video_url: '',
 });
 
-const submit = () => {
-    form.post(route('modules.store'));
+const submit = async () => {
+    try {
+        // Create the module first and get the response
+        const response = await fetch(route('modules.store'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify({
+                title: form.title,
+                description: form.description,
+                difficulty: form.difficulty,
+                video_url: form.video_url,
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            // Handle validation errors
+            if (response.status === 422) {
+                form.setError(errorData.errors || {});
+                return;
+            }
+            throw new Error('Module creation failed');
+        }
+
+        const result = await response.json();
+        const moduleId = result.moduleId;
+
+        // Upload attachments if any and if we have a module ID
+        if (attachmentUpload.value && moduleId) {
+            await attachmentUpload.value.uploadAttachments(moduleId);
+        }
+
+        // Redirect to modules index
+        window.location.href = route('modules.index');
+    } catch (error) {
+        console.error('Error during module creation:', error);
+        alert('Failed to create module. Please try again.');
+    }
+};
+
+const extractModuleIdFromUrl = (url: string): string | null => {
+    // This is a fallback - the backend should provide the module ID
+    const match = url.match(/\/modules\/([^\/]+)/);
+    return match ? match[1] : null;
 };
 </script>

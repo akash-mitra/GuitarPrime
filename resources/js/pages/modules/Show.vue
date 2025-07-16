@@ -73,7 +73,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-sm font-medium text-gray-900">{{ attachment.filename }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ attachment.name }}</p>
                                 <p class="text-xs text-gray-500">{{ (attachment.size / 1024 / 1024).toFixed(2) }} MB</p>
                             </div>
                         </div>
@@ -98,6 +98,7 @@ import { computed } from 'vue';
 
 interface Attachment {
     id: string;
+    name: string;
     filename: string;
     size: number;
     mime_type: string;

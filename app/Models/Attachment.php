@@ -12,6 +12,7 @@ class Attachment extends Model
 
     protected $fillable = [
         'module_id',
+        'name',
         'filename',
         'disk',
         'path',
