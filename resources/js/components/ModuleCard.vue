@@ -3,7 +3,7 @@
         :class="[
             'relative rounded-2xl border p-6 transition-all duration-300',
             {
-                'backdrop-blur-sm bg-white/10 dark:bg-black/20 border-white/20 dark:border-white/10 shadow hover:shadow-2xl hover:bg-white/20 dark:hover:bg-black/30': hasAccess,
+                'backdrop-blur-sm bg-white/10 dark:bg-gray-950 border-white/20 dark:border-white/10 shadow hover:shadow-2xl hover:bg-white/20 dark:hover:bg-gray-900': hasAccess,
                 'backdrop-blur-sm bg-white/5 dark:bg-black/10 border-white/10 dark:border-white/5 shadow-lg opacity-75': !hasAccess,
                 'cursor-move transition-all hover:scale-[1.02]': draggable,
             },

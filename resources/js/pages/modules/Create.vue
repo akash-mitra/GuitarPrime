@@ -2,17 +2,17 @@
     <Head title="Create Module" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-8 max-w-6xl">
             <h1 class="text-2xl font-semibold">Create Module</h1>
 
             <form @submit.prevent="submit">
                 <div class="mb-6">
-                    <label for="title" class="mb-2 block text-sm font-medium text-gray-700"> Module Title * </label>
+                    <label for="title" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-500"> Module Title * </label>
                     <input
                         id="title"
                         v-model="form.title"
                         type="text"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-950 dark:border-gray-700"
                         :class="{ 'border-red-500': form.errors.title }"
                         required
                     />
@@ -22,12 +22,12 @@
                 </div>
 
                 <div class="mb-6">
-                    <label for="description" class="mb-2 block text-sm font-medium text-gray-700"> Module Description * </label>
+                    <label for="description" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-500"> Module Description * </label>
                     <textarea
                         id="description"
                         v-model="form.description"
                         rows="4"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-950 dark:border-gray-700"
                         :class="{ 'border-red-500': form.errors.description }"
                         required
                     ></textarea>
@@ -37,11 +37,11 @@
                 </div>
 
                 <div class="mb-6">
-                    <label for="difficulty" class="mb-2 block text-sm font-medium text-gray-700"> Difficulty Level * </label>
+                    <label for="difficulty" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-500"> Difficulty Level * </label>
                     <select
                         id="difficulty"
                         v-model="form.difficulty"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-950 dark:border-gray-700"
                         :class="{ 'border-red-500': form.errors.difficulty }"
                         required
                     >
@@ -56,19 +56,23 @@
                 </div>
 
                 <div class="mb-6">
-                    <label for="video_url" class="mb-2 block text-sm font-medium text-gray-700"> Vimeo Video URL </label>
+                    <label for="video_url" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-500"> Vimeo Video URL </label>
                     <input
                         id="video_url"
                         v-model="form.video_url"
                         type="url"
                         placeholder="https://vimeo.com/123456789"
-                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-950 dark:border-gray-700"
                         :class="{ 'border-red-500': form.errors.video_url }"
                     />
                     <div v-if="form.errors.video_url" class="mt-1 text-sm text-red-600">
                         {{ form.errors.video_url }}
                     </div>
                     <p class="mt-1 text-sm text-gray-500">Optional. Must be a valid Vimeo URL (e.g., https://vimeo.com/123456789)</p>
+                </div>
+
+                <div class="mb-6">
+                    <AttachmentUpload ref="attachmentUpload" />
                 </div>
 
                 <div class="flex items-center justify-between">
@@ -89,14 +93,18 @@
 
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import AttachmentUpload from '@/components/AttachmentUpload.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
     { title: 'Modules', href: '/modules' },
     { title: 'Create', href: '/modules/create' },
 ];
+
+const attachmentUpload = ref<InstanceType<typeof AttachmentUpload>>();
 
 const form = useForm({
     title: '',
@@ -105,7 +113,47 @@ const form = useForm({
     video_url: '',
 });
 
-const submit = () => {
-    form.post(route('modules.store'));
+const submit = async () => {
+    try {
+        // Create the module first and get the response
+        const response = await fetch(route('modules.store'), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify({
+                title: form.title,
+                description: form.description,
+                difficulty: form.difficulty,
+                video_url: form.video_url,
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            // Handle validation errors
+            if (response.status === 422) {
+                form.setError(errorData.errors || {});
+                return;
+            }
+            throw new Error('Module creation failed');
+        }
+
+        const result = await response.json();
+        const moduleId = result.moduleId;
+
+        // Upload attachments if any and if we have a module ID
+        if (attachmentUpload.value && moduleId) {
+            await attachmentUpload.value.uploadAttachments(moduleId);
+        }
+
+        // Redirect to modules index
+        window.location.href = route('modules.index');
+    } catch (error) {
+        console.error('Error during module creation:', error);
+        alert('Failed to create module. Please try again.');
+    }
 };
 </script>

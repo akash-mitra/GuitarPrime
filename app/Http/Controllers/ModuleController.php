@@ -62,12 +62,21 @@ class ModuleController extends Controller
             'video_url' => 'nullable|url|regex:/^https:\/\/(www\.)?vimeo\.com\/\d+(\?.*)?$/',
         ]);
 
-        Module::create(array_merge($validated, [
+        $module = Module::create(array_merge($validated, [
             'coach_id' => auth()->id(),
         ]));
 
+        // Return JSON response if request expects JSON
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Module created successfully.',
+                'moduleId' => $module->id,
+            ]);
+        }
+
         return redirect()->route('modules.index')
-            ->with('success', 'Module created successfully.');
+            ->with('success', 'Module created successfully.')
+            ->with('moduleId', $module->id);
     }
 
     public function show(Module $module)
@@ -145,6 +154,8 @@ class ModuleController extends Controller
     public function edit(Module $module)
     {
         $this->authorize('update', $module);
+
+        $module->load('attachments');
 
         return Inertia::render('modules/Edit', [
             'module' => $module,

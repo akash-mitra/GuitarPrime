@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AttachmentFactory extends Factory
 {
+    /**
+     * Get the appropriate disk for storing attachments based on FILESYSTEM_DISK.
+     * Maps local -> private (secure local storage), s3 -> s3 (secure cloud storage).
+     */
+    private function getAttachmentDisk(): string
+    {
+        return config('filesystems.default') === 'local' ? 'private' : 's3';
+    }
+
     public function definition(): array
     {
         $fileTypes = [
@@ -23,8 +32,9 @@ class AttachmentFactory extends Factory
 
         return [
             'module_id' => Module::factory(),
+            'name' => $this->faker->sentence(3, true),
             'filename' => $filename,
-            'disk' => 'private',
+            'disk' => $this->getAttachmentDisk(),
             'path' => 'attachments/'.$this->faker->uuid().'/'.$filename,
             'type' => 'file',
             'size' => $this->faker->numberBetween(1024, 5242880), // 1KB to 5MB
@@ -35,6 +45,7 @@ class AttachmentFactory extends Factory
     public function pdf(): static
     {
         return $this->state(fn (array $attributes) => [
+            'name' => $this->faker->sentence(3, true),
             'filename' => $this->faker->words(3, true).'.pdf',
             'mime_type' => 'application/pdf',
             'path' => 'attachments/'.$this->faker->uuid().'/'.$this->faker->words(3, true).'.pdf',
@@ -47,6 +58,7 @@ class AttachmentFactory extends Factory
         $mime = $extension === 'jpg' ? 'image/jpeg' : 'image/png';
 
         return $this->state(fn (array $attributes) => [
+            'name' => $this->faker->sentence(3, true),
             'filename' => $this->faker->words(3, true).'.'.$extension,
             'mime_type' => $mime,
             'path' => 'attachments/'.$this->faker->uuid().'/'.$this->faker->words(3, true).'.'.$extension,
@@ -64,6 +76,7 @@ class AttachmentFactory extends Factory
         $type = $this->faker->randomElement($types);
 
         return $this->state(fn (array $attributes) => [
+            'name' => $this->faker->sentence(3, true),
             'filename' => $this->faker->words(3, true).'.'.$type['extension'],
             'mime_type' => $type['mime'],
             'path' => 'attachments/'.$this->faker->uuid().'/'.$this->faker->words(3, true).'.'.$type['extension'],

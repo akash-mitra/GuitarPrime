@@ -9,7 +9,7 @@
                 class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-900/50"
             >
                 <div class="flex-1">
-                    <h4 class="text-sm font-medium dark:text-gray-100">{{ attachment.filename }}</h4>
+                    <h4 class="text-sm font-medium dark:text-gray-100">{{ attachment.name }}</h4>
                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatFileSize(attachment.size) }} • {{ attachment.mime_type }}</p>
                 </div>
 
@@ -73,6 +73,7 @@ import PurchaseButton from '@/components/PurchaseButton.vue';
 
 interface Attachment {
     id: string;
+    name: string;
     filename: string;
     size: number;
     mime_type: string;
@@ -103,9 +104,9 @@ const formatFileSize = (bytes: number): string => {
 const downloadAttachment = (attachment: Attachment) => {
     // TODO: Implement actual download logic
     // This would typically make a request to a protected download endpoint
-    console.log('Downloading attachment:', attachment.filename);
+    console.log('Downloading attachment:', attachment.name);
 
     // For now, we'll just alert the user
-    alert(`Downloading ${attachment.filename}...`);
+    alert(`Downloading ${attachment.name}...`);
 };
 </script>

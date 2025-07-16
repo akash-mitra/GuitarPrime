@@ -136,9 +136,9 @@ class User extends Authenticatable
             return $this->hasPurchased($purchasable);
         }
 
-        // For modules, check if user has purchased any course containing this module
+        // For modules, check if user has purchased any course containing this module OR the module directly
         if ($purchasable instanceof \App\Models\Module) {
-            return $this->hasAccessToModuleThroughCourse($purchasable);
+            return $this->hasPurchased($purchasable) || $this->hasAccessToModuleThroughCourse($purchasable);
         }
 
         return false;
