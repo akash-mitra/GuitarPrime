@@ -24,11 +24,15 @@ class CourseController extends Controller
             ->when($search, function ($query, $search) {
                 return $query->where('title', 'like', "%{$search}%");
             })
-            ->when($user->role === 'student', function ($query) {
+            ->when($user === null, function ($query) {
+                // Guests can only see approved courses
+                return $query->approved();
+            })
+            ->when($user && $user->role === 'student', function ($query) {
                 // Students can only see approved courses
                 return $query->approved();
             })
-            ->when($user->role === 'coach', function ($query) use ($user) {
+            ->when($user && $user->role === 'coach', function ($query) use ($user) {
                 // Coaches can see all approved courses + their own unapproved courses
                 return $query->where(function ($subQuery) use ($user) {
                     $subQuery->where('is_approved', true)
@@ -119,14 +123,14 @@ class CourseController extends Controller
 
         return Inertia::render('Courses/Show', [
             'course' => $course,
-            'canAccess' => $user->canAccess($course),
+            'canAccess' => $user ? $user->canAccess($course) : false,
             'pricing' => [
                 'price' => $course->price,
                 'is_free' => $course->is_free,
                 'formatted_price' => $course->formatted_price,
             ],
             'moduleAccess' => $course->modules->mapWithKeys(function ($module) use ($user) {
-                return [$module->id => $user->canAccess($module)];
+                return [$module->id => $user ? $user->canAccess($module) : false];
             }),
         ]);
     }

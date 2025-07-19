@@ -86,10 +86,10 @@ defineEmits<{
 const page = usePage();
 
 const canEdit = computed(() => {
-    return page.props.auth.user.role === 'admin';
+    return page.props.auth.user && page.props.auth.user.role === 'admin';
 });
 
 const canDelete = computed(() => {
-    return page.props.auth.user.role === 'admin';
+    return page.props.auth.user && page.props.auth.user.role === 'admin';
 });
 </script>

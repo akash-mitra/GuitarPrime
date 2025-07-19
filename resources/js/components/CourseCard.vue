@@ -158,11 +158,13 @@ const page = usePage();
 
 const canEdit = computed(() => {
     const user = page.props.auth.user as User;
+    if (!user) return false;
     return user.role === 'admin' || (user.role === 'coach' && props.course.coach_id === user.id);
 });
 
 const canDelete = computed(() => {
     const user = page.props.auth.user as User;
+    if (!user) return false;
     return user.role === 'admin' || (user.role === 'coach' && props.course.coach_id === user.id && !props.course.is_approved);
 });
 

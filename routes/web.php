@@ -17,6 +17,7 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
 // Authentication Routes
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
@@ -35,11 +36,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('themes/{theme}', [ThemeController::class, 'destroy'])->name('themes.destroy');
 });
 
-// Theme browsing - All authenticated users can view themes (parameterized routes last)
-Route::middleware('auth')->group(function () {
-    Route::get('themes', [ThemeController::class, 'index'])->name('themes.index');
-    Route::get('themes/{theme}', [ThemeController::class, 'show'])->name('themes.show');
-});
+// Theme browsing - Available to all users including guests (parameterized routes last)
+Route::get('themes', [ThemeController::class, 'index'])->name('themes.index');
+Route::get('themes/{theme}', [ThemeController::class, 'show'])->name('themes.show');
 
 // Courses - Admin only routes (most specific first)
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -57,12 +56,10 @@ Route::middleware(['auth', 'role:admin,coach'])->group(function () {
     Route::delete('courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy');
 });
 
-// Course browsing - All authenticated users can view courses (parameterized routes last)
-Route::middleware('auth')->group(function () {
-    Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
-    Route::get('courses/{course}', [CourseController::class, 'show'])->name('courses.show');
-    Route::get('courses/{course}/modules/{module}', [ModuleController::class, 'showInCourse'])->name('courses.modules.show');
-});
+// Course browsing - Available to all users including guests (parameterized routes last)
+Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
+Route::get('courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+Route::get('courses/{course}/modules/{module}', [ModuleController::class, 'showInCourse'])->name('courses.modules.show');
 
 // Module management - Admin and coach only (specific routes first)
 Route::middleware(['auth', 'role:admin,coach'])->group(function () {
