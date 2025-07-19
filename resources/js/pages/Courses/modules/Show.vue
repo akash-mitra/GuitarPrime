@@ -52,7 +52,7 @@
                         <!-- Free module badge -->
                         <span v-if="module.is_free" class="rounded bg-orange-500 px-3 py-2 text-sm font-medium text-orange-100"> Free Demo </span>
                     </div>
-                    <p class="mb-6 text-gray-600">{{ module.description }}</p>
+                    <p class="mb-6 text-gray-600 dark:text-gray-400">{{ module.description }}</p>
                 </div>
 
                 <div class="flex flex-wrap gap-4">
@@ -177,6 +177,7 @@ import { computed } from 'vue';
 
 interface Attachment {
     id: string;
+    name: string;
     filename: string;
     size: number;
     mime_type: string;

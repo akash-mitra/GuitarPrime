@@ -3,12 +3,15 @@
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="mx-auto flex h-full max-w-7xl flex-1 flex-col gap-4 rounded-xl p-4 lg:p-6">
-            <div class="flex items-center justify-between">
+            <div class="sm:flex items-center justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold">{{ theme.name }}</h1>
-                    <p v-if="theme.description" class="mt-2 text-gray-600">{{ theme.description }}</p>
+                    <h1 class="text-3xl font-bold">
+                        <span class="text-red-500 text-base uppercase tracking-wide mr-3">Courses in</span>
+                        <span>{{ theme.name }}</span>
+                    </h1>
+                    <p v-if="theme.description" class="mt-2 text-gray-600 dark:text-gray-400">{{ theme.description }}</p>
                 </div>
-                <div class="ml-6 flex space-x-2">
+                <div class="sm:ml-6 mt-6 sm:mt-0 flex space-x-2">
                     <Link
                         :href="route('themes.index')"
                         class="rounded bg-gray-500 px-4 py-2 font-bold whitespace-nowrap text-white hover:bg-gray-700"
@@ -26,15 +29,14 @@
             </div>
 
             <div class="mb-6 rounded-lg py-4">
-                <h2 class="mb-4 text-2xl font-semibold border-b pb-4">Courses</h2>
+                <h2 class="mb-4 uppercase text-xs tracking-wide font-semibold pb-4 dark:text-gray-300">Recommended Courses</h2>
 
-                <div class="my-6">
-                    <input
+                <div class="mb-8">
+                    <Input
                         v-model="searchQuery"
                         type="text"
-                        placeholder="Search courses in this theme..."
-                        class="w-full max-w-md rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-950 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                    />
+                        class="block w-full h-12"
+                        placeholder="Search courses in this theme..."/>
                 </div>
 
                 <div v-if="courses.data.length === 0" class="py-8 text-center">
@@ -109,6 +111,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import { Input } from '@/components/ui/input';
 
 const props = defineProps<{
     theme: {

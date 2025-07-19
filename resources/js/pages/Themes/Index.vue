@@ -3,7 +3,7 @@
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="mx-auto flex h-full max-w-7xl flex-1 flex-col gap-4 rounded-xl p-4 lg:p-6">
-            <div class="flex items-center justify-between border-b pb-4">
+            <div class="flex items-center justify-between pb-4">
                 <div>
                     <h1 class="text-2xl font-semibold">Themes</h1>
                     <p class="py-2">
@@ -20,20 +20,19 @@
                 </Link>
             </div>
 
-            <div class="my-2">
-                <input
+            <div class="mb-6">
+                <Input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Search themes by name..."
-                    class="w-full max-w-md rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                />
+                    class="block w-full h-12"
+                    placeholder="Search themes by name..."/>
             </div>
 
             <div v-if="themes.data.length === 0" class="py-8 text-center">
                 <p class="text-gray-500">No themes found.</p>
             </div>
 
-            <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div v-else class="grid gap-4 md:gap-6 lg:gap-8 xl:gap-10 md:grid-cols-2 lg:grid-cols-3">
                 <ThemeCard v-for="theme in themes.data" :key="theme.id" :theme="theme" @delete="deleteTheme" />
             </div>
 
@@ -82,6 +81,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import { Input } from '@/components/ui/input';
 
 const props = defineProps<{
     themes: {

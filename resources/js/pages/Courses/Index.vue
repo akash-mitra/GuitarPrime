@@ -2,9 +2,14 @@
     <Head title="Courses" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-            <div class="flex items-center justify-between">
-                <h1 class="text-2xl font-semibold">All Courses</h1>
+        <div class="mx-auto flex h-full max-w-7xl flex-1 flex-col gap-4 rounded-xl p-4 lg:p-6">
+            <div class="flex items-center justify-between pb-4">
+                <div>
+                    <h1 class="text-2xl font-semibold">All Courses</h1>
+                    <p class="py-2">
+                        Browse our complete catalog of guitar courses covering various styles, techniques, and skill levels.
+                    </p>
+                </div>
                 <div class="flex space-x-3">
                     <Link
                         v-if="auth.user.role === 'admin'"
@@ -13,63 +18,35 @@
                     >
                         Approval Queue
                     </Link>
-                    <Link :href="route('courses.create')" class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
+                    <Link
+                        v-if="auth.user.role === 'admin' || auth.user.role === 'coach'"
+                        :href="route('courses.create')"
+                        class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+                    >
                         Create Course
                     </Link>
                 </div>
             </div>
 
-            <div class="mb-4">
-                <input
+            <div class="mb-6">
+                <Input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Search courses by title..."
-                    class="w-full max-w-md rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
-                />
+                    class="block w-full h-12"
+                    placeholder="Search courses by title..."/>
             </div>
 
             <div v-if="courses.data.length === 0" class="py-8 text-center">
                 <p class="text-gray-500">No courses found.</p>
             </div>
 
-            <div v-else class="space-y-4">
+            <div v-else class="grid gap-4 md:gap-6 lg:gap-8 xl:gap-10 md:grid-cols-2 lg:grid-cols-3">
                 <CourseCard v-for="course in courses.data" :key="course.id" :course="course" @delete="deleteCourse" />
             </div>
 
             <!-- Pagination -->
-            <div v-if="courses.links && courses.links.length > 3" class="mt-6">
-                <nav class="flex items-center justify-center">
-                    <div class="flex space-x-1">
-                        <template v-for="link in courses.links" :key="link.label">
-                            <Link
-                                v-if="link.url"
-                                :href="link.url"
-                                class="border border-gray-300 bg-white px-3 py-2 text-sm leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-                                :class="{
-                                    'border-blue-500 bg-blue-50 text-blue-600': link.active,
-                                    'rounded-l-lg': link.label === '&laquo; Previous',
-                                    'rounded-r-lg': link.label === 'Next &raquo;',
-                                }"
-                            >
-                                <span v-if="link.label === '&laquo; Previous'">← Previous</span>
-                                <span v-else-if="link.label === 'Next &raquo;'">Next →</span>
-                                <span v-else>{{ link.label }}</span>
-                            </Link>
-                            <span
-                                v-else
-                                class="cursor-default border border-gray-300 bg-white px-3 py-2 text-sm leading-tight text-gray-300"
-                                :class="{
-                                    'rounded-l-lg': link.label === '&laquo; Previous',
-                                    'rounded-r-lg': link.label === 'Next &raquo;',
-                                }"
-                            >
-                                <span v-if="link.label === '&laquo; Previous'">← Previous</span>
-                                <span v-else-if="link.label === 'Next &raquo;'">Next →</span>
-                                <span v-else>{{ link.label }}</span>
-                            </span>
-                        </template>
-                    </div>
-                </nav>
+            <div class="mt-6">
+                <Pagination :links="courses.links" />
             </div>
         </div>
     </AppLayout>
@@ -81,6 +58,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 
 interface User {
     id: number;
