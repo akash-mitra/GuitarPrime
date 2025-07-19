@@ -7,14 +7,16 @@ use App\Models\User;
 
 class ThemePolicy
 {
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'coach', 'student']);
+        // Allow guests to view themes for SEO and discovery
+        return true;
     }
 
-    public function view(User $user, Theme $theme): bool
+    public function view(?User $user, Theme $theme): bool
     {
-        return $user->hasAnyRole(['admin', 'coach', 'student']);
+        // Allow guests to view individual themes for SEO and discovery
+        return true;
     }
 
     public function create(User $user): bool

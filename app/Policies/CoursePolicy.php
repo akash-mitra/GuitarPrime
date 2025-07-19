@@ -7,13 +7,19 @@ use App\Models\User;
 
 class CoursePolicy
 {
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'coach', 'student']);
+        // Allow guests to view courses for SEO and discovery
+        return true;
     }
 
-    public function view(User $user, Course $course): bool
+    public function view(?User $user, Course $course): bool
     {
+        // Guests can only view approved courses
+        if ($user === null) {
+            return $course->is_approved;
+        }
+
         // Admins can view all courses
         if ($user->hasRole('admin')) {
             return true;

@@ -71,6 +71,43 @@
                     <p class="mt-1 text-sm text-gray-500">Optional. Must be a valid Vimeo URL (e.g., https://vimeo.com/123456789)</p>
                 </div>
 
+                <!-- Pricing Section -->
+                <div class="mb-6 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+                    <h3 class="mb-4 text-lg font-medium text-gray-900 dark:text-gray-100">Pricing</h3>
+                    
+                    <div class="mb-4">
+                        <label class="flex items-center">
+                            <input
+                                type="checkbox"
+                                v-model="form.is_free"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900"
+                            />
+                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">This module is free</span>
+                        </label>
+                    </div>
+
+                    <div v-if="!form.is_free" class="mb-4">
+                        <label for="price" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-500">
+                            Price (₹)
+                        </label>
+                        <input
+                            id="price"
+                            v-model="form.price"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            max="999999"
+                            placeholder="99.00"
+                            class="w-full rounded-md border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50 dark:bg-gray-950 dark:border-gray-700"
+                            :class="{ 'border-red-500': form.errors.price }"
+                        />
+                        <div v-if="form.errors.price" class="mt-1 text-sm text-red-600">
+                            {{ form.errors.price }}
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Enter the price in rupees. Leave blank if module is free.</p>
+                    </div>
+                </div>
+
                 <div class="mb-6">
                     <AttachmentUpload
                         ref="attachmentUpload"
@@ -116,6 +153,8 @@ interface Module {
     description: string;
     difficulty: 'easy' | 'medium' | 'hard';
     video_url?: string;
+    price?: number;
+    is_free?: boolean;
     attachments?: Attachment[];
 }
 
@@ -136,6 +175,8 @@ const form = useForm({
     description: props.module.description,
     difficulty: props.module.difficulty,
     video_url: props.module.video_url || '',
+    price: props.module.price ? props.module.price / 100 : null,
+    is_free: props.module.is_free || false,
 });
 
 const submit = async () => {

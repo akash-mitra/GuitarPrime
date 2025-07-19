@@ -214,6 +214,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 const { auth } = usePage().props;
 
 const canEdit = computed(() => {
+    if (!auth.user) return false;
     return auth.user.role === 'admin' || (auth.user.role === 'coach' && props.course.coach_id === auth.user.id);
 });
 

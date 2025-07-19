@@ -19,7 +19,7 @@
                         &laquo; Themes
                     </Link>
                     <Link
-                        v-if="$page.props.auth.user.role !== 'student'"
+                        v-if="$page.props.auth.user && $page.props.auth.user.role !== 'student'"
                         :href="route('themes.edit', theme.id)"
                         class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
                     >
@@ -44,7 +44,7 @@
                         {{ searchQuery ? 'No courses found matching your search.' : 'No approved courses found in this theme.' }}
                     </p>
                     <Link
-                        v-if="$page.props.auth.user.role !== 'student' && !searchQuery"
+                        v-if="$page.props.auth.user && $page.props.auth.user.role !== 'student' && !searchQuery"
                         :href="route('courses.create', { theme_id: theme.id })"
                         class="mt-4 inline-block rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-700"
                     >
@@ -93,7 +93,7 @@
                 </div>
             </div>
 
-            <div v-if="$page.props.auth.user.role !== 'student'" class="text-center">
+            <div v-if="$page.props.auth.user && $page.props.auth.user.role !== 'student'" class="text-center">
                 <Link
                     :href="route('courses.create', { theme_id: theme.id })"
                     class="rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-700"

@@ -60,7 +60,17 @@ class ModuleController extends Controller
             'description' => 'required|string|max:2000',
             'difficulty' => 'required|in:easy,medium,hard',
             'video_url' => 'nullable|url|regex:/^https:\/\/(www\.)?vimeo\.com\/\d+(\?.*)?$/',
+            'price' => 'nullable|numeric|min:0|max:999999',
+            'is_free' => 'boolean',
         ]);
+
+        // Convert price from rupees to paisa if provided
+        if (isset($validated['price']) && $validated['price'] !== null) {
+            $validated['price'] = (int) round($validated['price'] * 100);
+        }
+
+        // Ensure is_free is set correctly
+        $validated['is_free'] = $validated['is_free'] ?? false;
 
         $module = Module::create(array_merge($validated, [
             'coach_id' => auth()->id(),
@@ -88,13 +98,14 @@ class ModuleController extends Controller
 
         return Inertia::render('modules/Show', [
             'module' => $module,
-            'canAccess' => $user->canAccess($module),
+            'canAccess' => $user ? $user->canAccess($module) : false,
         ]);
     }
 
     public function showInCourse(Course $course, Module $module)
     {
         $this->authorize('view', $course);
+        $this->authorize('view', $module);
 
         // Verify that the module belongs to this course
         if (! $course->modules()->where('modules.id', $module->id)->exists()) {
@@ -139,8 +150,8 @@ class ModuleController extends Controller
         return Inertia::render('Courses/modules/Show', [
             'course' => $course->load(['theme', 'coach']),
             'module' => $module,
-            'canAccessCourse' => $user->canAccess($course),
-            'canAccessModule' => $user->canAccess($module),
+            'canAccessCourse' => $user ? $user->canAccess($course) : false,
+            'canAccessModule' => $user ? $user->canAccess($module) : false,
             'coursePricing' => [
                 'price' => $course->price,
                 'is_free' => $course->is_free,
@@ -171,7 +182,17 @@ class ModuleController extends Controller
             'description' => 'required|string|max:2000',
             'difficulty' => 'required|in:easy,medium,hard',
             'video_url' => 'nullable|url|regex:/^https:\/\/(www\.)?vimeo\.com\/\d+(\?.*)?$/',
+            'price' => 'nullable|numeric|min:0|max:999999',
+            'is_free' => 'boolean',
         ]);
+
+        // Convert price from rupees to paisa if provided
+        if (isset($validated['price']) && $validated['price'] !== null) {
+            $validated['price'] = (int) round($validated['price'] * 100);
+        }
+
+        // Ensure is_free is set correctly
+        $validated['is_free'] = $validated['is_free'] ?? false;
 
         $module->update($validated);
 

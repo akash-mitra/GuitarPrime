@@ -12,14 +12,14 @@
                 </div>
                 <div class="flex space-x-3">
                     <Link
-                        v-if="auth.user.role === 'admin'"
+                        v-if="auth.user && auth.user.role === 'admin'"
                         :href="route('courses.approval-queue')"
                         class="rounded bg-yellow-500 px-4 py-2 font-bold text-white hover:bg-yellow-700"
                     >
                         Approval Queue
                     </Link>
                     <Link
-                        v-if="auth.user.role === 'admin' || auth.user.role === 'coach'"
+                        v-if="auth.user && (auth.user.role === 'admin' || auth.user.role === 'coach')"
                         :href="route('courses.create')"
                         class="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
                     >

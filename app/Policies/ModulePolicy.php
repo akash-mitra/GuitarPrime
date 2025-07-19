@@ -7,13 +7,20 @@ use App\Models\User;
 
 class ModulePolicy
 {
-    public function viewAny(User $user): bool
+    public function viewAny(?User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'coach', 'student']);
+        // Allow guests to view modules for SEO and discovery
+        return true;
     }
 
-    public function view(User $user, Module $module): bool
+    public function view(?User $user, Module $module): bool
     {
+        // Guests can only view free modules
+        if ($user === null) {
+            return $module->is_free === true;
+        }
+
+        // Authenticated users can view all modules they have access to
         return $user->hasAnyRole(['admin', 'coach', 'student']);
     }
 
